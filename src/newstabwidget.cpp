@@ -21,6 +21,7 @@
 #include "adblockicon.h"
 #include "settings.h"
 #include "webpage.h"
+#include "youtubeserver.h"
 
 #if defined(Q_OS_WIN)
 #include <qt_windows.h>
@@ -34,6 +35,7 @@ NewsTabWidget::NewsTabWidget(QWidget *parent, TabType type, int feedId, int feed
   , feedParId_(feedParId)
   , currentNewsIdOld(-1)
   , autoLoadImages_(true)
+  , youtubeServer_(nullptr)
 {
   mainWindow_ = mainApp->mainWindow();
   db_ = QSqlDatabase::database();
@@ -143,6 +145,11 @@ NewsTabWidget::NewsTabWidget(QWidget *parent, TabType type, int feedId, int feed
 
 NewsTabWidget::~NewsTabWidget()
 {
+  if (youtubeServer_) {
+    youtubeServer_->stop();
+    delete youtubeServer_;
+    youtubeServer_ = nullptr;
+  }
   if (type_ == TabTypeDownloads) {
     mainApp->downloadManager()->hide();
     mainApp->downloadManager()->setParent(mainWindow_);
@@ -1062,6 +1069,22 @@ void NewsTabWidget::viewAllYoutubeVideos()
       }
   }
   if (allYoutubeVideos.isEmpty()) return;
+
+  // Stop existing server if running
+  if (youtubeServer_) {
+    youtubeServer_->stop();
+    delete youtubeServer_;
+    youtubeServer_ = nullptr;
+  }
+
+  // Create and start ephemeral HTTP server
+  youtubeServer_ = new YoutubeServer(this);
+  if (!youtubeServer_->start(0)) { // 0 = auto-select port
+    delete youtubeServer_;
+    youtubeServer_ = nullptr;
+    return;
+  }
+
   QFile sequentialYoutubePlayerHtmlFile;
   sequentialYoutubePlayerHtmlFile.setFileName(":/html/sequential_youtube_player");
   sequentialYoutubePlayerHtmlFile.open(QFile::ReadOnly);
@@ -1084,15 +1107,10 @@ void NewsTabWidget::viewAllYoutubeVideos()
 
   sequentialYoutubePlayerHtml = sequentialYoutubePlayerHtml.arg(videoTitlesAndIdsJavascript);
 
-  QTemporaryFile tempFile(QDir::tempPath() + "/sequential-youtube-player-XXXXXX.html");
-  if (tempFile.open()) {
-      tempFile.setAutoRemove(false);
-      QTextStream tempFileStream(&tempFile);
-      tempFileStream << sequentialYoutubePlayerHtml;
-      tempFile.close();
-      QUrl tempFileUrl = "file://" + tempFile.fileName();
-      openUrl(tempFileUrl);
-  }
+  youtubeServer_->setHtmlContent(sequentialYoutubePlayerHtml);
+
+  // Open the HTTP server URL in browser
+  openUrl(QUrl(youtubeServer_->serverUrl()));
 }
 
 /** @brief Mark selected news Starred

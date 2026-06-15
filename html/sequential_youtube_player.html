@@ -240,5 +240,12 @@
     </div>
 
     <ul id="queue"></ul>
+
+    <script>
+      // SSE connection to keep server alive
+      const evtSource = new EventSource('/sse');
+      evtSource.onopen = function() { console.log('SSE connected'); };
+      evtSource.onerror = function(err) { console.log('SSE error:', err); };
+    </script>
 </body>
 </html>
