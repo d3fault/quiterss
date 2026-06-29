@@ -22,7 +22,6 @@
 #include "database.h"
 #include "globals.h"
 #include "networkmanager.h"
-#include "adblockmanager.h"
 #include "settings.h"
 #include "splashscreen.h"
 #include "updatefeeds.h"
@@ -240,7 +239,6 @@ void MainApplication::connectDatabase()
 void MainApplication::loadSettings()
 {
   c2fLoadSettings();
-  reloadUserStyleBrowser();
 }
 
 void MainApplication::quitApplication()
@@ -588,15 +586,6 @@ DownloadManager *MainApplication::downloadManager()
   return downloadManager_;
 }
 
-void MainApplication::reloadUserStyleBrowser()
-{
-  Settings settings;
-  settings.beginGroup("Settings");
-  QString userStyleBrowser = settings.value("userStyleBrowser", QString()).toString();
-  QWebSettings::globalSettings()->setUserStyleSheetUrl(userStyleSheet(userStyleBrowser));
-  settings.endGroup();
-}
-
 /** @brief Set user style sheet for browser
  * @param filePath Filepath of user style
  * @return URL-link to user style
@@ -619,8 +608,6 @@ QUrl MainApplication::userStyleSheet(const QString &filePath) const
 #endif
   userStyle += QString("::selection {background: %1; color: %2;} ").arg(highlightColor, highlightedTextColor);
 #endif
-
-  userStyle += AdBlockManager::instance()->elementHidingRules();
 
   QFile file(filePath);
   if (!filePath.isEmpty() && file.open(QFile::ReadOnly)) {

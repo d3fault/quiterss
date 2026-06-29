@@ -99,7 +99,6 @@ public:
 public slots:
   void receiveMessage(const QString &message);
   void quitApplication();
-  void reloadUserStyleBrowser();
 
 signals:
   void signalRunUserFilter(int feedId, int filterId);

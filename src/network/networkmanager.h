@@ -55,9 +55,6 @@ private:
   QList<QSslCertificate> tempAllowedCerts_;
   bool ignoreAllWarnings_;
   QList<QSslCertificate> rejectedSslCerts_;
-
-  AdBlockManager *adblockManager_;
-
 };
 
 #endif // NETWORKMANAGER_H

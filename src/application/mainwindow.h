@@ -30,7 +30,6 @@
 #endif
 #endif
 #include <QtSql>
-#include <QtWebKit>
 #include <QPrintDialog>
 #include <QPrintPreviewDialog>
 #include <QPrinter>
@@ -48,7 +47,6 @@
 #include "tabbar.h"
 #include "optionsdialog.h"
 #include "updateappdialog.h"
-#include "webview.h"
 #include "parseobject.h"
 #include "toolbutton.h"
 
@@ -142,7 +140,6 @@ public:
   QAction *printAct_;
   QAction *printPreviewAct_;
   QAction *savePageAsAct_;
-  QAction *savePageAsDescriptAct_;
   QAction *restoreNewsAct_;
   QAction *restoreLastNewsAct_;
   QAction *newsLabelAction_;
@@ -167,8 +164,6 @@ public:
   QAction *telegramShareAct_;
   QAction *viberShareAct_;
   QAction *copyLinkAct_;
-  QAction *pageUpWebViewAct_;
-  QAction *pageDownWebViewAct_;
   QAction *nextFolderAct_;
   QAction *prevFolderAct_;
   QAction *expandFolderAct_;
@@ -273,10 +268,6 @@ public:
   bool closeNotify_;
   QList<int> idFeedsNotifyList_;
 
-  AdBlockIcon *adBlockIcon() { return adblockIcon_; }
-
-  void webViewFullScreen(bool on);
-
 public slots:
   void restoreFeedsOnStartUp();
   void addFeed();
@@ -291,7 +282,6 @@ public slots:
   void slotGetAllFeeds();
   void slotStopUpdate();
   void showProgressBar(int addToMaximum);
-  void slotSetValue(int value);
   void showMessageStatusBar(QString message, int timeout = 0);
   void slotCountsStatusBar(int unreadCount, int allCount);
   void slotPlaySound(const QString &path);
@@ -309,11 +299,8 @@ public slots:
   void slotUpdateStatus(int feedId, bool changed = true);
   void setNewsFilter(QAction*, bool clicked = true);
   void slotCloseTab(int index);
-  QWebPage *createWebTab(QUrl url = QUrl());
   void feedsModelReload(bool checkFilter = false);
   void setStatusFeed(int feedId, QString status);
-  void slotPrint(QWebFrame *frame = 0);
-  void slotPrintPreview(QWebFrame* frame = 0);
 
 signals:
   void signalQuitApp();
@@ -401,8 +388,6 @@ private slots:
   void feedsColumnVisible(QAction *action);
   void setNewsLayout(QAction *action);
   void setNewsLayout();
-  void setBrowserPosition(QAction *action);
-  void slotOpenNewsWebView();
 
   void slotNewsUpPressed();
   void slotNewsDownPressed();
@@ -420,8 +405,6 @@ private slots:
   void slotOpenNewsBackgroundTab();
   void slotCopyLinkNews();
   void slotShowLabelsMenu();
-  void slotPageUpWebView();
-  void slotPageDownWebView();
   void setCurrentTab(int index, bool updateCurrentTab = false);
   void findText();
 
@@ -438,11 +421,7 @@ private slots:
   void slotSelectFind();
   void findFeedVisible(bool visible);
 
-  void browserZoom(QAction*);
   void slotReportProblem();
-
-  void slotSavePageAs();
-  void slotSavePageAsDescript();
 
   void setFullScreen();
   void setStayOnTop();
@@ -628,7 +607,6 @@ private:
   QActionGroup *styleGroup_;
   QActionGroup *browserPositionGroup_;
   QActionGroup *feedsFilterGroup_;
-  QActionGroup *browserZoomGroup_;
   QActionGroup *newsSortByColumnGroup_;
   QActionGroup *newsSortOrderGroup_;
 
@@ -672,7 +650,6 @@ private:
   QMenu *feedsFilterMenu_;
   QMenu *newsFilterMenu_;
   QMenu *feedsColumnsMenu_;
-  QMenu *browserZoomMenu_;
 
   QToolBar *mainToolbar_;
   QToolBar *feedsToolBar_;
@@ -703,7 +680,6 @@ private:
   int behaviorIconTray_;
 
   int openingFeedAction_;
-  bool openNewsWebViewOn_;
 
 #ifdef HAVE_QT5
   QMediaPlayer *mediaPlayer_;

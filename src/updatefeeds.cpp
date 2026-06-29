@@ -92,8 +92,6 @@ UpdateFeeds::UpdateFeeds(QObject *parent, bool addFeed)
             updateObject_, SLOT(slotImportFeeds(QByteArray)));
     connect(updateObject_, SIGNAL(showProgressBar(int)),
             parent, SLOT(showProgressBar(int)));
-    connect(updateObject_, SIGNAL(loadProgress(int)),
-            parent, SLOT(slotSetValue(int)));
     connect(updateObject_, SIGNAL(signalMessageStatusBar(QString,int)),
             parent, SLOT(showMessageStatusBar(QString,int)));
     connect(updateObject_, SIGNAL(signalUpdateFeedsModel()),

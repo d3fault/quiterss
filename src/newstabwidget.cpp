@@ -18,9 +18,7 @@
 #include "newstabwidget.h"
 
 #include "mainapplication.h"
-#include "adblockicon.h"
 #include "settings.h"
-#include "webpage.h"
 
 #if defined(Q_OS_WIN)
 #include <qt_windows.h>
@@ -97,11 +95,9 @@ NewsTabWidget::NewsTabWidget(QWidget *parent, TabType type, int feedId, int feed
 
       if ((mainWindow_->browserPosition_ == TOP_POSITION) ||
           (mainWindow_->browserPosition_ == LEFT_POSITION)) {
-        newsTabWidgetSplitter_->addWidget(webWidget_);
         newsTabWidgetSplitter_->addWidget(newsWidget_);
       } else {
         newsTabWidgetSplitter_->addWidget(newsWidget_);
-        newsTabWidgetSplitter_->addWidget(webWidget_);
       }
     }
   }
@@ -113,8 +109,6 @@ NewsTabWidget::NewsTabWidget(QWidget *parent, TabType type, int feedId, int feed
     layout->addWidget(mainApp->downloadManager());
   else if (type_ != TabTypeWeb)
     layout->addWidget(newsTabWidgetSplitter_);
-  else
-    layout->addWidget(webWidget_);
   setLayout(layout);
 
   if (type_ < TabTypeWeb) {
@@ -152,11 +146,6 @@ NewsTabWidget::~NewsTabWidget()
 void NewsTabWidget::disconnectObjects()
 {
   disconnect(this);
-  if (type_ != TabTypeDownloads) {
-    webView_->disconnect(this);
-    webView_->disconnectObjects();
-    qobject_cast<WebPage*>(webView_->page())->disconnectObjects();
-  }
 }
 
 /** @brief Create news list with all related panels
@@ -291,12 +280,6 @@ void NewsTabWidget::createNewsList()
   connect(newsModel_, SIGNAL(signalSort(int,int)),
           this, SLOT(slotSort(int,int)));
 
-  connect(findText_, SIGNAL(textChanged(QString)),
-          this, SLOT(slotFindText(QString)));
-  connect(findText_, SIGNAL(signalSelectFind()),
-          this, SLOT(slotSelectFind()));
-  connect(findText_, SIGNAL(returnPressed()),
-          this, SLOT(slotSelectFind()));
   connect(findText_, SIGNAL(signalVisible(bool)),
           mainWindow_, SLOT(findText()));
 
@@ -337,129 +320,16 @@ void NewsTabWidget::showContextMenuNews(const QPoint &pos)
  *----------------------------------------------------------------------------*/
 void NewsTabWidget::createWebWidget()
 {
-  webView_ = new WebView(this);
-
-  webViewProgress_ = new QProgressBar(this);
-  webViewProgress_->setObjectName("webViewProgress_");
-  webViewProgress_->setFixedHeight(15);
-  webViewProgress_->setMinimum(0);
-  webViewProgress_->setMaximum(100);
-  webViewProgress_->setVisible(true);
-  connect(this, SIGNAL(loadProgress(int)),
-          webViewProgress_, SLOT(setValue(int)), Qt::QueuedConnection);
-
-  webViewProgressLabel_ = new QLabel(this);
-  webViewProgressLabel_->setObjectName("webViewProgressLabel_");
-  webViewProgressLabel_->setStyleSheet("background: none;");
-  QHBoxLayout *progressLayout = new QHBoxLayout();
-  progressLayout->setMargin(0);
-  progressLayout->addWidget(webViewProgressLabel_, 0, Qt::AlignLeft|Qt::AlignVCenter);
-  webViewProgress_->setLayout(progressLayout);
-
-  //! Create web control panel
-  webToolBar_ = new QToolBar(this);
-  webToolBar_->setStyleSheet("QToolBar { border: none; padding: 0px; }");
-  webToolBar_->setIconSize(QSize(18, 18));
-
-  webHomePageAct_ = new QAction(this);
-  webHomePageAct_->setIcon(QIcon(":/images/homePage"));
-
-  webToolBar_->addAction(webHomePageAct_);
-  QAction *webAction = webView_->pageAction(QWebPage::Back);
-  webToolBar_->addAction(webAction);
-  webAction = webView_->pageAction(QWebPage::Forward);
-  webToolBar_->addAction(webAction);
-  webAction = webView_->pageAction(QWebPage::Reload);
-  webToolBar_->addAction(webAction);
-  webAction = webView_->pageAction(QWebPage::Stop);
-  webToolBar_->addAction(webAction);
-  webToolBar_->addSeparator();
-
-  webToolBar_->addAction(mainApp->mainWindow()->shareMenuAct_);
-
   webExternalBrowserAct_ = new QAction(this);
   webExternalBrowserAct_->setIcon(QIcon(":/images/openBrowser"));
-  webToolBar_->addAction(webExternalBrowserAct_);
-
-  locationBar_ = new LocationBar(webView_, this);
-
-  QHBoxLayout *webControlPanelLayout = new QHBoxLayout();
-  webControlPanelLayout->setMargin(2);
-  webControlPanelLayout->setSpacing(2);
-  webControlPanelLayout->addWidget(webToolBar_);
-  webControlPanelLayout->addWidget(locationBar_, 1);
-
-  webControlPanel_ = new QWidget(this);
-  webControlPanel_->setObjectName("webControlPanel_");
-  webControlPanel_->setStyleSheet(
-        QString("#webControlPanel_ {border-bottom: 1px solid %1;}").
-        arg(qApp->palette().color(QPalette::Dark).name()));
-  webControlPanel_->setLayout(webControlPanelLayout);
-
-  if (type_ != TabTypeWeb)
-    setWebToolbarVisible(false, false);
-  else
-    setWebToolbarVisible(true, false);
-
-  //! Create web layout
-  QVBoxLayout *webLayout = new QVBoxLayout();
-  webLayout->setMargin(0);
-  webLayout->setSpacing(0);
-  webLayout->addWidget(webControlPanel_);
-  webLayout->addWidget(webView_, 1);
-  webLayout->addWidget(webViewProgress_);
-
-  webWidget_ = new QWidget(this);
-  webWidget_->setObjectName("webWidget_");
-  webWidget_->setLayout(webLayout);
-  webWidget_->setMinimumWidth(400);
-  webWidget_->setMinimumHeight(100);
-  setWebWidgetVisible();
-
-  webView_->page()->action(QWebPage::OpenLink)->disconnect();
-  webView_->page()->action(QWebPage::OpenLinkInNewWindow)->disconnect();
 
   urlExternalBrowserAct_ = new QAction(this);
   urlExternalBrowserAct_->setIcon(QIcon(":/images/openBrowser"));
 
-  connect(webHomePageAct_, SIGNAL(triggered()),
-          this, SLOT(webHomePage()));
   connect(webExternalBrowserAct_, SIGNAL(triggered()),
           this, SLOT(openPageInExternalBrowser()));
   connect(urlExternalBrowserAct_, SIGNAL(triggered()),
           this, SLOT(openUrlInExternalBrowser()));
-  connect(this, SIGNAL(signalSetHtmlWebView(QString)),
-          SLOT(slotSetHtmlWebView(QString)), Qt::QueuedConnection);
-  connect(webView_, SIGNAL(loadStarted()), this, SLOT(slotLoadStarted()));
-  connect(webView_, SIGNAL(loadFinished(bool)), this, SLOT(slotLoadFinished(bool)));
-  connect(webView_, SIGNAL(linkClicked(QUrl)), this, SLOT(slotLinkClicked(QUrl)));
-  connect(webView_->page(), SIGNAL(linkHovered(QString,QString,QString)),
-          this, SLOT(slotLinkHovered(QString,QString,QString)));
-  connect(webView_, SIGNAL(loadProgress(int)), this, SLOT(slotSetValue(int)), Qt::QueuedConnection);
-
-  connect(webView_, SIGNAL(titleChanged(QString)),
-          this, SLOT(webTitleChanged(QString)));
-  connect(webView_->page()->action(QWebPage::OpenLink), SIGNAL(triggered()),
-          this, SLOT(openLink()));
-  connect(webView_->page()->action(QWebPage::OpenLinkInNewWindow), SIGNAL(triggered()),
-          this, SLOT(openLinkInNewTab()));
-
-  connect(webView_, SIGNAL(showContextMenu(QPoint)),
-          this, SLOT(showContextWebPage(QPoint)), Qt::QueuedConnection);
-  connect(webView_, SIGNAL(signalGoHome()),
-          this, SLOT(webHomePage()));
-
-  connect(mainWindow_->autoLoadImagesToggle_, SIGNAL(triggered()),
-          this, SLOT(setAutoLoadImages()));
-  connect(mainWindow_->browserToolbarToggle_, SIGNAL(triggered()),
-          this, SLOT(setWebToolbarVisible()));
-  connect(mainWindow_->webWidgetVisibleAct_, SIGNAL(triggered()),
-          this, SLOT(setWebWidgetVisible()));
-
-  connect(locationBar_, SIGNAL(returnPressed()),this, SLOT(slotUrlEnter()));
-  connect(webView_, SIGNAL(rssChanged(bool)), locationBar_, SLOT(showRssIcon(bool)));
-  connect(webView_, SIGNAL(urlChanged(QUrl)),
-          this, SLOT(slotUrlChanged(QUrl)), Qt::QueuedConnection);
 }
 
 /** @brief Read settings from ini-file
@@ -528,24 +398,11 @@ void NewsTabWidget::setSettings(bool init, bool newTab)
       videoPlayerHtml_ = QString::fromUtf8(file.readAll());
       file.close();
     }
-
-    if (mainWindow_->externalBrowserOn_ <= 0) {
-      webView_->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
-    } else {
-      webView_->page()->setLinkDelegationPolicy(QWebPage::DelegateExternalLinks);
-    }
-
-    webView_->page()->action(QWebPage::Back)->setShortcut(mainWindow_->backWebPageAct_->shortcut());
-    webView_->page()->action(QWebPage::Forward)->setShortcut(mainWindow_->forwardWebPageAct_->shortcut());
-    webView_->page()->action(QWebPage::Reload)->setShortcut(mainWindow_->reloadWebPageAct_->shortcut());
-
-    QWebSettings::setObjectCacheCapacities(0, 0, 0);
   }
 
   QModelIndex feedIndex = feedsModel_->indexById(feedId_);
 
   if (init) {
-    QWebSettings::clearMemoryCaches();
 
     if (type_ == TabTypeFeed) {
       int displayEmbeddedImages = feedsModel_->dataField(feedIndex, "displayEmbeddedImages").toInt();
@@ -559,21 +416,10 @@ void NewsTabWidget::setSettings(bool init, bool newTab)
     } else {
       autoLoadImages_ = mainWindow_->autoLoadImages_;
     }
-    webView_->settings()->setAttribute(QWebSettings::AutoLoadImages, autoLoadImages_);
-
-    webView_->setZoomFactor(qreal(mainWindow_->defaultZoomPages_)/100.0);
   }
-  setAutoLoadImages(false);
 
   if (type_ == TabTypeFeed) {
     int javaScriptEnable = feedsModel_->dataField(feedIndex, "javaScriptEnable").toInt();
-    if (javaScriptEnable == 2) {
-      webView_->settings()->setAttribute(QWebSettings::JavascriptEnabled, true);
-    } else if (javaScriptEnable == 1) {
-      webView_->settings()->setAttribute(QWebSettings::JavascriptEnabled, mainWindow_->javaScriptEnable_);
-    } else if (javaScriptEnable == 0) {
-      webView_->settings()->setAttribute(QWebSettings::JavascriptEnabled, false);
-    }
 
     int layoutDirection = feedsModel_->dataField(feedIndex, "layoutDirection").toInt();
     if (!layoutDirection) {
@@ -581,8 +427,6 @@ void NewsTabWidget::setSettings(bool init, bool newTab)
     } else {
       newsView_->setLayoutDirection(Qt::RightToLeft);
     }
-  } else {
-    webView_->settings()->setAttribute(QWebSettings::JavascriptEnabled, mainWindow_->javaScriptEnable_);
   }
 
   if (type_ < TabTypeWeb) {
@@ -614,9 +458,7 @@ void NewsTabWidget::setSettings(bool init, bool newTab)
  *----------------------------------------------------------------------------*/
 void NewsTabWidget::retranslateStrings() {
   if (type_ != TabTypeDownloads) {
-    webViewProgress_->setFormat(tr("Loading... (%p%)"));
 
-    webHomePageAct_->setText(tr("Home"));
     webExternalBrowserAct_->setText(tr("Open Page in External Browser"));
     urlExternalBrowserAct_->setText(tr("Open Link in External Browser"));
 
@@ -637,43 +479,6 @@ void NewsTabWidget::retranslateStrings() {
   }
 
   closeButton_->setToolTip(tr("Close Tab"));
-}
-
-void NewsTabWidget::setAutoLoadImages(bool apply)
-{
-  if (type_ == NewsTabWidget::TabTypeDownloads) return;
-  if (mainWindow_->currentNewsTab != this) return;
-
-  if (apply)
-    autoLoadImages_ = !autoLoadImages_;
-
-  if (autoLoadImages_) {
-    mainWindow_->autoLoadImagesToggle_->setText(tr("Load Images"));
-    mainWindow_->autoLoadImagesToggle_->setToolTip(tr("Auto Load Images in News View"));
-    mainWindow_->autoLoadImagesToggle_->setIcon(QIcon(":/images/imagesOn"));
-  } else {
-    mainWindow_->autoLoadImagesToggle_->setText(tr("Don't Load Images"));
-    mainWindow_->autoLoadImagesToggle_->setToolTip(tr("Don't Load Images in News View"));
-    mainWindow_->autoLoadImagesToggle_->setIcon(QIcon(":/images/imagesOff"));
-  }
-
-  if (apply) {
-    webView_->settings()->setAttribute(QWebSettings::AutoLoadImages, autoLoadImages_);
-    if (autoLoadImages_) {
-      if ((webView_->title() == "news_descriptions") &&
-          (type_ == NewsTabWidget::TabTypeFeed)) {
-        switch (mainWindow_->newsLayout_) {
-        case 1:
-          loadNewspaper();
-          break;
-        default:
-          updateWebView(newsView_->currentIndex());
-        }
-      } else {
-        webView_->reload();
-      }
-    }
-  }
 }
 
 /** @brief Process mouse click in news list
@@ -699,7 +504,6 @@ void NewsTabWidget::slotNewsViewSelected(QModelIndex index, bool clicked)
   }
 
   if (!index.isValid()) {
-    hideWebContent();
     currentNewsIdOld = newsId;
     return;
   }
@@ -732,8 +536,6 @@ void NewsTabWidget::slotNewsViewSelected(QModelIndex index, bool clicked)
 
       mainWindow_->categoriesTree_->currentItem()->setText(3, QString::number(newsId));
     }
-
-    updateWebView(index);
     mainWindow_->statusBar()->showMessage(linkNewsString_, 3000);
   }
   currentNewsIdOld = newsId;
@@ -755,14 +557,6 @@ void NewsTabWidget::slotNewsMiddleClicked(QModelIndex index)
 
   if (mainWindow_->markNewsReadOn_ && mainWindow_->markCurNewsRead_)
     slotSetItemRead(index, 1);
-
-  if (QApplication::keyboardModifiers() == Qt::NoModifier) {
-    webView_->buttonClick_ = MIDDLE_BUTTON;
-  } else if (QApplication::keyboardModifiers() == Qt::AltModifier) {
-    webView_->buttonClick_ = LEFT_BUTTON_ALT;
-  } else {
-    webView_->buttonClick_ = MIDDLE_BUTTON_MOD;
-  }
 
   QUrl url = QUrl::fromEncoded(getLinkNews(index.row()).toUtf8());
   slotLinkClicked(url);
@@ -1339,250 +1133,13 @@ void NewsTabWidget::slotSort(int column, int/* order*/)
   q.exec(qStr);
 }
 
-/** @brief Load/Update browser contents
- *----------------------------------------------------------------------------*/
-void NewsTabWidget::updateWebView(QModelIndex index)
-{
-  if (!index.isValid()) {
-    hideWebContent();
-    return;
-  }
-
-  QString newsId = newsModel_->dataField(index.row(), "id").toString();
-  linkNewsString_ = getLinkNews(index.row());
-  QString linkString = linkNewsString_;
-  QUrl newsUrl = QUrl::fromEncoded(linkString.toUtf8());
-
-  bool showDescriptionNews_ = mainWindow_->showDescriptionNews_;
-  QModelIndex currentIndex = feedsProxyModel_->mapToSource(feedsView_->currentIndex());
-  QVariant displayNews = feedsModel_->dataField(currentIndex, "displayNews");
-  QString feedId = newsModel_->dataField(index.row(), "feedId").toString();
-  QModelIndex feedIndex = feedsModel_->indexById(feedId.toInt());
-
-  if (!displayNews.toString().isEmpty())
-    showDescriptionNews_ = !displayNews.toInt();
-
-  if (!showDescriptionNews_) {
-    if (mainWindow_->externalBrowserOn_ <= 0) {
-      locationBar_->setText(newsUrl.toString());
-      setWebToolbarVisible(true, false);
-
-      webView_->history()->setMaximumItemCount(0);
-      webView_->load(newsUrl);
-      webView_->history()->setMaximumItemCount(100);
-    } else {
-      openUrl(newsUrl);
-    }
-  } else {
-    setWebToolbarVisible(false, false);
-
-    QString htmlStr;
-    QString content = newsModel_->dataField(index.row(), "content").toString();
-    if (!content.contains(QzRegExp("<html(.*)</html>", Qt::CaseInsensitive))) {
-      QString description = newsModel_->dataField(index.row(), "description").toString();
-      if (content.isEmpty() || (description.length() > content.length())) {
-        content = description;
-      }
-
-      QString titleString = newsModel_->dataField(index.row(), "title").toString();
-      if (!linkString.isEmpty()) {
-        titleString = QString("<a href='%1' class='unread'>%2</a>").
-            arg(linkString, titleString);
-      }
-
-      QDateTime dtLocal;
-      QString dateString = newsModel_->dataField(index.row(), "published").toString();
-      if (!dateString.isNull()) {
-        QDateTime dtLocalTime = QDateTime::currentDateTime();
-        QDateTime dtUTC = QDateTime(dtLocalTime.date(), dtLocalTime.time(), Qt::UTC);
-        int nTimeShift = dtLocalTime.secsTo(dtUTC);
-
-        QDateTime dt = QDateTime::fromString(dateString, Qt::ISODate);
-        dtLocal = dt.addSecs(nTimeShift);
-      } else {
-        dtLocal = QDateTime::fromString(
-              newsModel_->dataField(index.row(), "received").toString(),
-              Qt::ISODate);
-      }
-      if (QDateTime::currentDateTime().date() <= dtLocal.date())
-        dateString = dtLocal.toString(mainWindow_->formatTime_);
-      else
-        dateString = dtLocal.toString(mainWindow_->formatDate_ + " " + mainWindow_->formatTime_);
-
-      // Create author panel from news author
-      QString authorString;
-      QString authorName = newsModel_->dataField(index.row(), "author_name").toString();
-      QString authorEmail = newsModel_->dataField(index.row(), "author_email").toString();
-      QString authorUri = newsModel_->dataField(index.row(), "author_uri").toString();
-
-      QzRegExp reg("(^\\S+@\\S+\\.\\S+)", Qt::CaseInsensitive);
-      int pos = reg.indexIn(authorName);
-      if (pos > -1) {
-        authorName.replace(reg.cap(1), QString(" <a href='mailto:%1'>%1</a>").arg(reg.cap(1)));
-      }
-
-      authorString = authorName;
-
-      if (!authorEmail.isEmpty())
-        authorString.append(QString(" <a href='mailto:%1'>e-mail</a>").arg(authorEmail));
-      if (!authorUri.isEmpty())
-        authorString.append(QString(" <a href='%1'>page</a>"). arg(authorUri));
-
-      // If news author is absent, create author panel from feed author
-      // @note(arhohryakov:2012.01.03) Author is got from current feed, because
-      //   news is belong to it
-      if (authorString.isEmpty()) {
-        authorName  = feedsModel_->dataField(feedIndex, "author_name").toString();
-        authorEmail = feedsModel_->dataField(feedIndex, "author_email").toString();
-        authorUri   = feedsModel_->dataField(feedIndex, "author_uri").toString();
-
-        authorString = authorName;
-
-        if (!authorEmail.isEmpty())
-          authorString.append(QString(" <a href='mailto:%1'>e-mail</a>").arg(authorEmail));
-        if (!authorUri.isEmpty())
-          authorString.append(QString(" <a href='%1'>page</a>").arg(authorUri));
-      }
-
-      QString commentsStr;
-      QString commentsUrl = newsModel_->dataField(index.row(), "comments").toString();
-
-      if (!commentsUrl.isEmpty())
-      {
-        commentsStr = QString("<a href=\"%1\"> %2</a>").arg(commentsUrl, tr("Comments"));
-      }
-
-      QString category = newsModel_->dataField(index.row(), "category").toString();
-
-      if (!authorString.isEmpty())
-      {
-        authorString = QString(tr("Author: %1")).arg(authorString);
-
-        if (!commentsStr.isEmpty())
-        {
-          authorString.append(QString(" | %1").arg(commentsStr));
-        }
-        if (!category.isEmpty())
-        {
-          authorString.append(QString(" | %1").arg(category));
-        }
-      }
-      else
-      {
-        if (!commentsStr.isEmpty())
-        {
-          authorString.append(commentsStr);
-        }
-
-        if (!category.isEmpty())
-        {
-          if (!commentsStr.isEmpty())
-          {
-            authorString.append(QString(" | %1").arg(category));
-          }
-          else
-          {
-            authorString.append(category);
-          }
-        }
-      }
-
-      QString labelsString = getHtmlLabels(index.row());
-
-      authorString.append(QString("<table class=\"labels\" id=\"labels%1\"><tr>%2</tr></table>").
-                          arg(newsId).arg(labelsString));
-
-      QString enclosureStr;
-      QString enclosureUrl = newsModel_->dataField(index.row(), "enclosure_url").toString();
-
-      if (!enclosureUrl.isEmpty())
-      {
-        QString type = newsModel_->dataField(index.row(), "enclosure_type").toString();
-
-        if (type.contains("image"))
-        {
-          if (!content.contains(enclosureUrl) && autoLoadImages_)
-          {
-            enclosureStr = QString("<IMG SRC=\"%1\" class=\"enclosureImg\"><p>").arg(enclosureUrl);
-          }
-        }
-        else
-        {
-          if (type.contains("audio"))
-          {
-            type = tr("audio");
-            enclosureStr = audioPlayerHtml_.arg(enclosureUrl);
-            enclosureStr.append("<p>");
-          }
-          else if (type.contains("video"))
-          {
-            type = tr("video");
-            enclosureStr = videoPlayerHtml_.arg(enclosureUrl);
-            enclosureStr.append("<p>");
-          }
-          else
-          {
-            type = tr("media");
-          }
-
-          enclosureStr.append(QString("<a href=\"%1\" class=\"enclosure\"> %2 %3 </a><p>").
-                              arg(enclosureUrl, tr("Link to"), type));
-        }
-      }
-
-      content = enclosureStr + content;
-
-      bool ltr = !feedsModel_->dataField(feedIndex, "layoutDirection").toInt();
-      QString cssStr = cssString_.
-          arg(ltr ? "left" : "right").  // text-align
-          arg(ltr ? "ltr" : "rtl").    // direction
-          arg(ltr ? "right" : "left");  // "Date" text-align
-
-      if (!autoLoadImages_) {
-        QzRegExp reg("<img[^>]+>", Qt::CaseInsensitive);
-        content = content.remove(reg);
-      }
-
-      QUrl url;
-      url.setScheme(newsUrl.scheme());
-      url.setHost(newsUrl.host());
-      if (url.host().indexOf('.') == -1) {
-        QUrl hostUrl = feedsModel_->dataField(feedIndex, "htmlUrl").toString();
-        url.setHost(hostUrl.host());
-      }
-
-      if (ltr)
-        htmlStr = htmlString_.arg(cssStr, titleString, dateString, authorString, content, url.toString());
-      else
-        htmlStr = htmlRtlString_.arg(cssStr, titleString, dateString, authorString, content, url.toString());
-    } else {
-      if (!autoLoadImages_) {
-        content = content.remove(QzRegExp("<img[^>]+>", Qt::CaseInsensitive));
-      }
-
-      htmlStr = content;
-    }
-
-    htmlStr = htmlStr.replace("src=\"//", "src=\"http://");
-
-    emit signalSetHtmlWebView(htmlStr);
-  }
-}
-
 void NewsTabWidget::loadNewspaper(int refresh)
 {
   if (mainWindow_->newsLayout_ != 1) return;
-  setWebToolbarVisible(false, false);
-  webView_->setUpdatesEnabled(false);
 
   int sortOrder = newsHeader_->sortIndicatorOrder();
   int scrollBarValue = 0;
   int height = 0;
-  if (refresh != RefreshAll) {
-    scrollBarValue = webView_->page()->mainFrame()->scrollBarValue(Qt::Vertical);
-    height = webView_->page()->mainFrame()->contentsSize().height();
-  }
-  webView_->settings()->setAttribute(QWebSettings::AutoLoadImages, true);
 
   QString htmlStr;
   QUrl hostUrl;
@@ -1600,8 +1157,6 @@ void NewsTabWidget::loadNewspaper(int refresh)
         arg(ltr ? "ltr" : "rtl"). // direction
         arg(ltr ? "right" : "left"); // "Date" text-align
     htmlStr = newspaperHeadHtml_.arg(cssStr, hostUrl.toString());
-
-    webView_->setHtml(htmlStr);
   }
 
   int idx = -1;
@@ -1620,14 +1175,6 @@ void NewsTabWidget::loadNewspaper(int refresh)
 
     QModelIndex index = newsModel_->index(idx, newsModel_->fieldIndex("id"));
     QString newsId = newsModel_->dataField(index.row(), "id").toString();
-
-    if (refresh == RefreshInsert) {
-      QWebElement document = webView_->page()->mainFrame()->documentElement();
-      QWebElement element = document.findFirst(QString("div[id=newsItem%1]").arg(newsId));
-      if (!element.isNull()) {
-        continue;
-      }
-    }
 
     linkNewsString_ = getLinkNews(index.row());
     QString linkString = linkNewsString_;
@@ -1833,40 +1380,8 @@ void NewsTabWidget::loadNewspaper(int refresh)
     }
 
     htmlStr = htmlStr.replace("src=\"//", "src=\"http://");
-
-    QWebElement document = webView_->page()->mainFrame()->documentElement();
-    QWebElement element = document.findFirst("body");
-    if ((refresh == RefreshInsert) && (sortOrder == Qt::DescendingOrder))
-      element.prependInside(htmlStr);
-    else
-      element.appendInside(htmlStr);
     qApp->processEvents();
   }
-
-  webView_->settings()->setAttribute(QWebSettings::AutoLoadImages, autoLoadImages_);
-  if ((refresh == RefreshInsert) && (sortOrder == Qt::DescendingOrder))
-    scrollBarValue += webView_->page()->mainFrame()->contentsSize().height() - height;
-  if (refresh != RefreshAll)
-    webView_->page()->mainFrame()->setScrollBarValue(Qt::Vertical, scrollBarValue);
-
-  webView_->setUpdatesEnabled(true);
-}
-
-/** @brief Asynchorous update web view
- *----------------------------------------------------------------------------*/
-void NewsTabWidget::slotSetHtmlWebView(const QString &html)
-{
-  webView_->history()->setMaximumItemCount(0);
-  webView_->setHtml(html);
-  webView_->history()->setMaximumItemCount(100);
-}
-
-void NewsTabWidget::hideWebContent()
-{
-  if (mainWindow_->newsLayout_ == 1) return;
-
-  emit signalSetHtmlWebView();
-  setWebToolbarVisible(false, false);
 }
 
 void NewsTabWidget::slotLinkClicked(QUrl url)
@@ -1892,36 +1407,7 @@ void NewsTabWidget::slotLinkClicked(QUrl url)
       url.setHost(hostUrl.host());
     }
   }
-
-  if ((mainWindow_->externalBrowserOn_ <= 0) &&
-      (webView_->buttonClick_ != LEFT_BUTTON_ALT)) {
-    if (webView_->buttonClick_ == LEFT_BUTTON) {
-      if (!webControlPanel_->isVisible()) {
-        locationBar_->setText(url.toString());
-        setWebToolbarVisible(true, false);
-      }
-      webView_->load(url);
-    } else {
-      if ((webView_->buttonClick_ == MIDDLE_BUTTON) ||
-          (webView_->buttonClick_ == LEFT_BUTTON_CTRL)) {
-        mainWindow_->openNewsTab_ = NEW_TAB_BACKGROUND;
-      } else {
-        mainWindow_->openNewsTab_ = NEW_TAB_FOREGROUND;
-      }
-      if (!mainWindow_->openLinkInBackgroundEmbedded_) {
-        if (mainWindow_->openNewsTab_ == NEW_TAB_BACKGROUND)
-          mainWindow_->openNewsTab_ = NEW_TAB_FOREGROUND;
-        else
-          mainWindow_->openNewsTab_ = NEW_TAB_BACKGROUND;
-      }
-
-      mainWindow_->createWebTab(url);
-    }
-  } else {
-    openUrl(url);
-  }
-
-  webView_->buttonClick_ = 0;
+  openUrl(url);
 }
 //----------------------------------------------------------------------------
 void NewsTabWidget::slotLinkHovered(const QString &link, const QString &, const QString &)
@@ -1931,24 +1417,12 @@ void NewsTabWidget::slotLinkHovered(const QString &link, const QString &, const 
   mainWindow_->statusBar()->showMessage(link.simplified(), 3000);
 }
 //----------------------------------------------------------------------------
-void NewsTabWidget::slotSetValue(int value)
-{
-  emit loadProgress(value);
-  QString str = QString(" %1 kB / %2 kB").
-      arg(webView_->page()->bytesReceived()/1000).
-      arg(webView_->page()->totalBytes()/1000);
-  webViewProgressLabel_->setText(str);
-}
-//----------------------------------------------------------------------------
 void NewsTabWidget::slotLoadStarted()
 {
   if (type_ == TabTypeWeb) {
     newsIconTitle_->setMovie(newsIconMovie_);
     newsIconMovie_->start();
   }
-
-  webViewProgress_->setValue(0);
-  webViewProgress_->show();
 }
 //----------------------------------------------------------------------------
 void NewsTabWidget::slotLoadFinished(bool)
@@ -1959,27 +1433,6 @@ void NewsTabWidget::slotLoadFinished(bool)
     iconTab.load(":/images/webPage");
     newsIconTitle_->setPixmap(iconTab);
   }
-
-  webViewProgress_->hide();
-}
-
-void NewsTabWidget::slotUrlEnter()
-{
-  webView_->setFocus();
-
-  if (!locationBar_->text().startsWith("http://") &&
-      !locationBar_->text().startsWith("https://")) {
-    locationBar_->setText("http://" + locationBar_->text());
-  }
-  locationBar_->setCursorPosition(0);
-
-  webView_->load(QUrl(locationBar_->text()));
-}
-
-void NewsTabWidget::slotUrlChanged(const QUrl &url)
-{
-  locationBar_->setText(url.toString());
-  locationBar_->setCursorPosition(0);
 }
 
 /** @brief Go to short news content
@@ -1991,11 +1444,7 @@ void NewsTabWidget::webHomePage()
     case 1:
       loadNewspaper();
       break;
-    default:
-      updateWebView(newsView_->currentIndex());
     }
-  } else {
-    webView_->history()->goToItem(webView_->history()->itemAt(0));
   }
 }
 
@@ -2003,7 +1452,8 @@ void NewsTabWidget::webHomePage()
  *----------------------------------------------------------------------------*/
 void NewsTabWidget::openPageInExternalBrowser()
 {
-  openUrl(webView_->url());
+    qCritical("openPageInExternalBrowser");
+  //openUrl(webView_->url());
 }
 
 /** @brief Open news in browser
@@ -2068,8 +1518,6 @@ void NewsTabWidget::openInExternalBrowserNews()
       mainWindow_->recountCategoryCounts();
       newsView_->viewport()->update();
     }
-  } else {
-    openUrl(webView_->url());
   }
 }
 
@@ -2084,44 +1532,7 @@ void NewsTabWidget::setNewsLayout()
     break;
   default:
     newsWidget_->setVisible(true);
-    updateWebView(newsView_->currentIndex());
   }
-}
-
-/** @brief Set browser position
- *----------------------------------------------------------------------------*/
-void NewsTabWidget::setBrowserPosition()
-{
-  if (type_ >= TabTypeWeb) return;
-
-  int idx = newsTabWidgetSplitter_->indexOf(webWidget_);
-
-  switch (mainWindow_->browserPosition_) {
-  case TOP_POSITION: case LEFT_POSITION:
-    newsTabWidgetSplitter_->insertWidget(0, newsTabWidgetSplitter_->widget(idx));
-    break;
-  default:
-    newsTabWidgetSplitter_->insertWidget(1, newsTabWidgetSplitter_->widget(idx));
-  }
-
-  switch (mainWindow_->browserPosition_) {
-  case RIGHT_POSITION: case LEFT_POSITION:
-    newsTabWidgetSplitter_->setOrientation(Qt::Horizontal);
-    newsTabWidgetSplitter_->setStyleSheet(
-          QString("QSplitter::handle {background: qlineargradient("
-                  "x1: 0, y1: 0, x2: 0, y2: 1,"
-                  "stop: 0 %1, stop: 0.07 %2);}").
-          arg(newsPanelWidget_->palette().window().color().name()).
-          arg(qApp->palette().color(QPalette::Dark).name()));
-    break;
-  default:
-    newsTabWidgetSplitter_->setOrientation(Qt::Vertical);
-    newsTabWidgetSplitter_->setStyleSheet(
-          QString("QSplitter::handle {background: %1; margin-top: 1px; margin-bottom: 1px;}").
-          arg(qApp->palette().color(QPalette::Dark).name()));
-  }
-
-  newsTabWidgetSplitter_->setChildrenCollapsible(false);
 }
 
 /** @brief Close tab while press X-button
@@ -2166,8 +1577,6 @@ void NewsTabWidget::openNewsNewTab()
       url.setScheme(hostUrl.scheme());
       url.setHost(hostUrl.host());
     }
-
-    mainWindow_->createWebTab(url);
   }
 }
 
@@ -2184,12 +1593,6 @@ void NewsTabWidget::openLinkInNewTab()
 {
   int externalBrowserOn_ = mainWindow_->externalBrowserOn_;
   mainWindow_->externalBrowserOn_ = 0;
-
-  if (QApplication::keyboardModifiers() == Qt::NoModifier) {
-    webView_->buttonClick_ = MIDDLE_BUTTON;
-  } else {
-    webView_->buttonClick_ = MIDDLE_BUTTON_MOD;
-  }
 
   slotLinkClicked(linkUrl_);
   mainWindow_->externalBrowserOn_ = externalBrowserOn_;
@@ -2226,139 +1629,6 @@ bool NewsTabWidget::openUrl(const QUrl &url)
   }
   return QDesktopServices::openUrl(url);
 }
-//----------------------------------------------------------------------------
-void NewsTabWidget::slotFindText(const QString &text)
-{
-  QString objectName = findText_->findGroup_->checkedAction()->objectName();
-  if (objectName == "findInBrowserAct") {
-    webView_->findText("", QWebPage::HighlightAllOccurrences);
-    webView_->findText(text, QWebPage::HighlightAllOccurrences);
-  } else {
-    int newsId = newsModel_->dataField(newsView_->currentIndex().row(), "id").toInt();
-
-    QString filterStr;
-    switch (type_) {
-    case TabTypeUnread:
-    case TabTypeStar:
-    case TabTypeDel:
-    case TabTypeLabel:
-      filterStr = categoryFilterStr_;
-      break;
-    default:
-      filterStr = mainWindow_->newsFilterStr;
-    }
-
-    if (!text.isEmpty()) {
-      QString findText = text;
-      findText = findText.replace("'", "''").toUpper();
-      if (objectName == "findTitleAct") {
-        filterStr.append(
-              QString(" AND UPPER(title) LIKE '%%1%'").arg(findText));
-      } else if (objectName == "findAuthorAct") {
-        filterStr.append(
-              QString(" AND UPPER(author_name) LIKE '%%1%'").arg(findText));
-      } else if (objectName == "findCategoryAct") {
-        filterStr.append(
-              QString(" AND UPPER(category) LIKE '%%1%'").arg(findText));
-      } else if (objectName == "findContentAct") {
-        filterStr.append(
-              QString(" AND (UPPER(content) LIKE '%%1%' OR UPPER(description) LIKE '%%1%')").
-              arg(findText));
-      } else if (objectName == "findLinkAct") {
-        filterStr.append(
-              QString(" AND link_href LIKE '%%1%'").
-              arg(findText));
-      } else {
-        filterStr.append(
-              QString(" AND (UPPER(title) LIKE '%%1%' OR UPPER(author_name) LIKE '%%1%' "
-                      "OR UPPER(category) LIKE '%%1%' OR UPPER(content) LIKE '%%1%' "
-                      "OR UPPER(description) LIKE '%%1%')").
-              arg(findText));
-      }
-    }
-
-    newsModel_->setFilter(filterStr);
-
-    QModelIndex index = newsModel_->index(0, newsModel_->fieldIndex("id"));
-    QModelIndexList indexList = newsModel_->match(index, Qt::EditRole, newsId);
-    if (indexList.count()) {
-      int newsRow = indexList.first().row();
-      newsView_->setCurrentIndex(newsModel_->index(newsRow, newsModel_->fieldIndex("title")));
-    } else {
-      currentNewsIdOld = newsId;
-      hideWebContent();
-    }
-  }
-}
-//----------------------------------------------------------------------------
-void NewsTabWidget::slotSelectFind()
-{
-  webView_->findText("", QWebPage::HighlightAllOccurrences);
-  slotFindText(findText_->text());
-}
-//----------------------------------------------------------------------------
-void NewsTabWidget::showContextWebPage(const QPoint &p)
-{
-  QMenu menu;
-  QMenu *pageMenu = webView_->page()->createStandardContextMenu();
-  if (pageMenu) {
-    menu.addActions(pageMenu->actions());
-
-    webView_->page()->action(QWebPage::OpenLink)->setText(tr("Open Link"));
-    webView_->page()->action(QWebPage::OpenLinkInNewWindow)->setText(tr("Open in New Tab"));
-    webView_->page()->action(QWebPage::DownloadLinkToDisk)->setText(tr("Save Link..."));
-    webView_->page()->action(QWebPage::DownloadImageToDisk)->setText(tr("Save Image..."));
-    webView_->page()->action(QWebPage::CopyLinkToClipboard)->setText(tr("Copy Link"));
-    webView_->page()->action(QWebPage::Copy)->setText(tr("Copy"));
-    webView_->page()->action(QWebPage::Back)->setText(tr("Go Back"));
-    webView_->page()->action(QWebPage::Forward)->setText(tr("Go Forward"));
-    webView_->page()->action(QWebPage::Stop)->setText(tr("Stop"));
-    webView_->page()->action(QWebPage::Reload)->setText(tr("Reload"));
-    webView_->page()->action(QWebPage::CopyImageToClipboard)->setText(tr("Copy Image"));
-#if QT_VERSION >= 0x040800
-    webView_->page()->action(QWebPage::CopyImageUrlToClipboard)->setText(tr("Copy Image Address"));
-#endif
-
-    const QWebHitTestResult &hitTest = webView_->page()->mainFrame()->hitTestContent(p);
-    if (!hitTest.linkUrl().isEmpty() && hitTest.linkUrl().scheme() != "javascript") {
-      linkUrl_ = hitTest.linkUrl();
-      if (mainWindow_->externalBrowserOn_ <= 0) {
-        menu.addSeparator();
-        menu.addAction(urlExternalBrowserAct_);
-      }
-    } else if (pageMenu->actions().indexOf(webView_->pageAction(QWebPage::Reload)) >= 0) {
-      if (webView_->title() == "news_descriptions") {
-        webView_->pageAction(QWebPage::Reload)->setVisible(false);
-      } else {
-        webView_->pageAction(QWebPage::Reload)->setVisible(true);
-        menu.addSeparator();
-      }
-      menu.addAction(mainWindow_->autoLoadImagesToggle_);
-      menu.addSeparator();
-      menu.addAction(mainWindow_->printAct_);
-      menu.addAction(mainWindow_->printPreviewAct_);
-      menu.addSeparator();
-      menu.addAction(mainWindow_->savePageAsAct_);
-    } else if (hitTest.isContentEditable()) {
-      for (int i = 0; i < menu.actions().count(); i++) {
-        if ((i <= 1) && (menu.actions().at(i)->text() == "Direction")) {
-          menu.actions().at(i)->setVisible(false);
-          break;
-        }
-      }
-      menu.insertSeparator(menu.actions().at(0));
-      menu.insertAction(menu.actions().at(0), webView_->pageAction(QWebPage::Redo));
-      menu.insertAction(menu.actions().at(0), webView_->pageAction(QWebPage::Undo));
-    }
-
-    if (!hitTest.isContentEditable() && !hitTest.isContentSelected()) {
-      menu.addSeparator();
-      menu.addAction(mainWindow_->adBlockIcon()->menuAction());
-    }
-
-    menu.exec(webView_->mapToGlobal(p));
-  }
-}
 
 /** @brief Open link in external browser
  *----------------------------------------------------------------------------*/
@@ -2381,20 +1651,6 @@ void NewsTabWidget::openUrlInExternalBrowser()
     }
   }
   openUrl(linkUrl_);
-}
-
-void NewsTabWidget::setWebToolbarVisible(bool show, bool checked)
-{
-  if (!checked) webToolbarShow_ = show;
-  webControlPanel_->setVisible(webToolbarShow_ &
-                               mainWindow_->browserToolbarToggle_->isChecked());
-}
-
-void NewsTabWidget::setWebWidgetVisible()
-{
-  if (type_ >= TabTypeWeb) return;
-
-  webWidget_->setVisible(mainWindow_->webWidgetVisibleAct_->isChecked());
 }
 
 /** @brief Set label for selected news
@@ -2422,20 +1678,6 @@ void NewsTabWidget::setLabelNews(int labelId)
     newsModel_->setData(index, strIdLabels);
 
     int newsId = newsModel_->dataField(index.row(), "id").toInt();
-
-    if ((newsId == currentNewsIdOld) &&
-        (webView_->title() == "news_descriptions")) {
-      QWebFrame *frame = webView_->page()->mainFrame();
-      QWebElement document = frame->documentElement();
-      QWebElement element = document.findFirst(QString("table[id=labels%1]").arg(newsId));
-      if (!element.isNull()) {
-        webView_->settings()->setAttribute(QWebSettings::AutoLoadImages,true);
-        element.removeAllChildren();
-        QString labelsString = getHtmlLabels(index.row());
-        element.appendInside(labelsString);
-        webView_->settings()->setAttribute(QWebSettings::AutoLoadImages, autoLoadImages_);
-      }
-    }
 
     QSqlQuery q;
     q.exec(QString("UPDATE news SET label='%1' WHERE id=='%2'").
@@ -2470,18 +1712,6 @@ void NewsTabWidget::setLabelNews(int labelId)
       newsModel_->setData(index, strIdLabels);
 
       int newsId = newsModel_->dataField(index.row(), "id").toInt();
-
-      if ((newsId == currentNewsIdOld) &&
-          (webView_->title() == "news_descriptions")) {
-        QWebFrame *frame = webView_->page()->mainFrame();
-        QWebElement document = frame->documentElement();
-        QWebElement element = document.findFirst(QString("table[id=labels%1]").arg(newsId));
-        if (!element.isNull()) {
-          element.removeAllChildren();
-          QString labelsString = getHtmlLabels(index.row());
-          element.appendInside(labelsString);
-        }
-      }
 
       QSqlQuery q;
       q.exec(QString("UPDATE news SET label='%1' WHERE id=='%2'").
@@ -2615,10 +1845,6 @@ void NewsTabWidget::slotShareNews(QAction *action)
       }
       QTextDocumentFragment textDocument = QTextDocumentFragment::fromHtml(content);
       content = textDocument.toPlainText();
-    } else {
-      title = webView_->title();
-      linkString = webView_->url().toString();
-      content = webView_->page()->mainFrame()->toPlainText();
     }
 #if defined(Q_OS_WIN) || defined(Q_OS_OS2) || defined(Q_OS_MAC)
     content = content.replace("\n", "%0A");
@@ -2804,13 +2030,7 @@ void NewsTabWidget::slotShareNews(QAction *action)
 #endif
       externalApp = true;
     }
-
-    if ((mainWindow_->externalBrowserOn_ <= 0) && !externalApp) {
-      mainWindow_->openNewsTab_ = NEW_TAB_FOREGROUND;
-      mainWindow_->createWebTab(url);
-    } else {
-      QDesktopServices::openUrl(url);
-    }
+    QDesktopServices::openUrl(url);
   }
 }
 //-----------------------------------------------------------------------------
@@ -2836,23 +2056,6 @@ QString NewsTabWidget::getLinkNews(int row)
   if (linkString.isEmpty())
     linkString = newsModel_->dataField(row, "link_alternate").toString();
   return linkString.simplified();
-}
-
-void NewsTabWidget::savePageAsDescript()
-{
-  if (type_ >= TabTypeWeb) return;
-
-  QModelIndex curIndex = newsView_->currentIndex();
-  if (!curIndex.isValid()) return;
-
-  QString html = webView_->page()->currentFrame()->toHtml().replace("'", "''");
-  newsModel_->setData(
-        newsModel_->index(curIndex.row(), newsModel_->fieldIndex("content")),
-        html);
-  int newsId = newsModel_->dataField(curIndex.row(), "id").toInt();
-  QString qStr = QString("UPDATE news SET content='%1' WHERE id=='%2'").
-      arg(html).arg(newsId);
-  mainApp->sqlQueryExec(qStr);
 }
 
 QString NewsTabWidget::getHtmlLabels(int row)
@@ -2893,18 +2096,6 @@ void NewsTabWidget::actionNewspaper(QUrl url)
         iconStr = "qrc:/images/bulletUnread";
         titleStyle = "unread";
       }
-      QWebElement document = webView_->page()->mainFrame()->documentElement();
-      QWebElement newsItem = document.findFirst(QString("div[id=newsItem%1]").arg(newsId));
-      if (!newsItem.isNull()) {
-        webView_->settings()->setAttribute(QWebSettings::AutoLoadImages, true);
-        QWebElement element = newsItem.findFirst(QString("img[id=readAction%1]").arg(newsId));
-        if (!element.isNull())
-          element.setAttribute("src", iconStr);
-        element = newsItem.findFirst(QString("a[id=title%1]").arg(newsId));
-        if (!element.isNull())
-          element.setAttribute("class", titleStyle);
-        webView_->settings()->setAttribute(QWebSettings::AutoLoadImages, autoLoadImages_);
-      }
     } else if (url.host() == "star.action.ui") {
       int row = indexList.first().row();
       if (newsModel_->dataField(row, "starred").toInt() == 0) {
@@ -2913,16 +2104,6 @@ void NewsTabWidget::actionNewspaper(QUrl url)
       } else {
         slotSetItemStar(newsModel_->index(row, newsModel_->fieldIndex("starred")), 0);
         iconStr = "qrc:/images/starOff";
-      }
-      QWebElement document = webView_->page()->mainFrame()->documentElement();
-      QWebElement newsItem = document.findFirst(QString("div[id=newsItem%1]").arg(newsId));
-      if (!newsItem.isNull()) {
-        QWebElement element = newsItem.findFirst(QString("img[id=starAction%1]").arg(newsId));
-        if (!element.isNull()) {
-          webView_->settings()->setAttribute(QWebSettings::AutoLoadImages, true);
-          element.setAttribute("src", iconStr);
-          webView_->settings()->setAttribute(QWebSettings::AutoLoadImages, autoLoadImages_);
-        }
       }
     } else if (url.host() == "labels.menu.ui") {
       newsView_->selectionModel()->clearSelection();
@@ -2952,11 +2133,6 @@ void NewsTabWidget::actionNewspaper(QUrl url)
       newsView_->selectionModel()->select(
             indexList.first(), QItemSelectionModel::Select|QItemSelectionModel::Rows);
       deleteNews();
-      QWebElement document = webView_->page()->mainFrame()->documentElement();
-      QWebElement newsItem = document.findFirst(QString("div[id=newsItem%1]").arg(newsId));
-      if (!newsItem.isNull()) {
-        newsItem.removeFromDocument();
-      }
     }
   }
 }

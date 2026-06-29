@@ -784,16 +784,12 @@ void OptionsDialog::createFeedsWidget()
   positionLastNews_ = new QRadioButton(tr("Set focus on the last opened news"));
   positionFirstNews_ = new QRadioButton(tr("Set focus at the top of news list"));
   positionUnreadNews_ = new QRadioButton(tr("Set focus on the unread news"));
-  openNewsWebViewOn_ = new QCheckBox(tr("Open the news"));
   nottoOpenNews_ = new QRadioButton(tr("Nothing to do"));
-  connect(nottoOpenNews_, SIGNAL(toggled(bool)),
-          openNewsWebViewOn_, SLOT(setDisabled(bool)));
 
   QGridLayout *openingFeedsLayout = new QGridLayout();
   openingFeedsLayout->setContentsMargins(15, 0, 0, 10);
   openingFeedsLayout->setColumnStretch(1, 1);
   openingFeedsLayout->addWidget(positionLastNews_, 0, 0, 1, 1);
-  openingFeedsLayout->addWidget(openNewsWebViewOn_, 0, 1, 1, 1);
   openingFeedsLayout->addWidget(positionFirstNews_, 1, 0, 1, 1);
   openingFeedsLayout->addWidget(positionUnreadNews_, 2, 0, 1, 1);
   openingFeedsLayout->addWidget(nottoOpenNews_, 3, 0, 1, 1);

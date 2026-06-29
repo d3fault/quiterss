@@ -24,18 +24,15 @@
 #include <QtGui>
 #endif
 #include <QtSql>
-#include <QtWebKit>
 
 #include "feedsproxymodel.h"
 #include "feedsmodel.h"
 #include "feedsview.h"
 #include "findtext.h"
 #include "lineedit.h"
-#include "locationbar.h"
 #include "newsheader.h"
 #include "newsmodel.h"
 #include "newsview.h"
-#include "webview.h"
 
 class MainWindow;
 
@@ -74,7 +71,6 @@ public:
   void retranslateStrings();
   void setSettings(bool init = true, bool newTab = true);
   void setNewsLayout();
-  void setBrowserPosition();
   void markNewsRead();
   void markAllNewsRead();
   void markNewsStar();
@@ -84,16 +80,13 @@ public:
   void restoreNews();
   void slotCopyLinkNews();
   void showLabelsMenu();
-  void savePageAsDescript();
 
   bool openUrl(const QUrl &url);
   void openInBrowserNews();
   void openInExternalBrowserNews();
   void openNewsNewTab();
 
-  void updateWebView(QModelIndex index);
   void loadNewspaper(int refresh = RefreshAll);
-  void hideWebContent();
   QString getLinkNews(int row);
 
   void reduceNewsList();
@@ -128,10 +121,6 @@ public:
   QSplitter *newsTabWidgetSplitter_;
 
   QWidget *newsWidget_;
-  WebView *webView_;
-  QToolBar *webToolBar_;
-  LocationBar *locationBar_;
-  QWidget *webControlPanel_;
 
   QLabel *newsIconTitle_;
   QMovie *newsIconMovie_;
@@ -142,7 +131,6 @@ public:
   QAction *separatorRAct_;
 
 public slots:
-  void setAutoLoadImages(bool apply = true);
   void slotNewsViewClicked(QModelIndex index);
   void slotNewsViewSelected(QModelIndex index, bool clicked=false);
   void slotNewsViewDoubleClicked(QModelIndex index);
@@ -156,7 +144,6 @@ public slots:
   void slotSort(int column, int order);
 
 signals:
-  void signalSetHtmlWebView(const QString &html = "", const QUrl &baseUrl = QUrl());
   void signalSetTextTab(const QString &text, NewsTabWidget *widget);
   void loadProgress(int);
 
@@ -166,29 +153,18 @@ private slots:
   void slotSetItemStar(QModelIndex index, int starred);
   void slotMarkReadTimeout();
 
-  void slotSetHtmlWebView(const QString &html);
   void webHomePage();
   void openPageInExternalBrowser();
   void slotLinkClicked(QUrl url);
   void slotLinkHovered(const QString &link, const QString &str1="", const QString &str2="");
-  void slotSetValue(int value);
   void slotLoadStarted();
   void slotLoadFinished(bool);
-  void slotUrlEnter();
-  void slotUrlChanged(const QUrl &url);
-  void showContextWebPage(const QPoint &p);
   void openUrlInExternalBrowser();
 
   void slotTabClose();
   void webTitleChanged(QString title);
   void openLink();
   void openLinkInNewTab();
-
-  void slotFindText(const QString& text);
-  void slotSelectFind();
-
-  void setWebToolbarVisible(bool show = true, bool checked = true);
-  void setWebWidgetVisible();
 
   void slotNewslLabelClicked(QModelIndex index);
 
@@ -205,12 +181,6 @@ private:
   FeedsProxyModel *feedsProxyModel_;
   FeedsView *feedsView_;
 
-  QFrame *lineWebWidget;
-  QWidget *webWidget_;
-  QProgressBar *webViewProgress_;
-  QLabel *webViewProgressLabel_;
-
-  QAction *webHomePageAct_;
   QAction *webExternalBrowserAct_;
   QAction *urlExternalBrowserAct_;
 
