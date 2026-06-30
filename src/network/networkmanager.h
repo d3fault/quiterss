@@ -22,8 +22,6 @@
 #include <QSslError>
 #include <QStringList>
 
-class AdBlockManager;
-
 class NetworkManager : public QNetworkAccessManager
 {
   Q_OBJECT

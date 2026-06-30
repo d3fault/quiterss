@@ -30,9 +30,6 @@
 #endif
 #endif
 #include <QtSql>
-#include <QPrintDialog>
-#include <QPrintPreviewDialog>
-#include <QPrinter>
 #include <QSound>
 
 #include "categoriestreewidget.h"
@@ -64,8 +61,6 @@ enum FeedReedType {
   FeedReadTypeCount,
   FeedReadSwitchingTab
 };
-
-class AdBlockIcon;
 
 class MainWindow : public QMainWindow
 {
@@ -114,12 +109,9 @@ public:
   NewsTabWidget *currentNewsTab;
 
   QAction *newsToolbarToggle_;
-  QAction *browserToolbarToggle_;
-  QAction *webWidgetVisibleAct_;
   QAction *categoriesPanelToggle_;
   QAction *statusBarToggle_;
   QAction *newsFilter_;
-  QAction *openDescriptionNewsAct_;
   QAction *openInBrowserAct_;
   QAction *openInExternalBrowserAct_;
   QAction *openNewsNewTabAct_;
@@ -136,10 +128,6 @@ public:
   QAction *newsKeyPageDownAct_;
   QAction *prevUnreadNewsAct_;
   QAction *nextUnreadNewsAct_;
-  QAction *autoLoadImagesToggle_;
-  QAction *printAct_;
-  QAction *printPreviewAct_;
-  QAction *savePageAsAct_;
   QAction *restoreNewsAct_;
   QAction *restoreLastNewsAct_;
   QAction *newsLabelAction_;
@@ -171,9 +159,6 @@ public:
   QAction *closeOtherTabsAct_;
   QAction *closeAllTabsAct_;
   QAction *settingPageLabelsAct_;
-  QAction *backWebPageAct_;
-  QAction *forwardWebPageAct_;
-  QAction *reloadWebPageAct_;
 
   QActionGroup *newsFilterGroup_;
   QActionGroup *newsLabelGroup_;
@@ -217,7 +202,6 @@ public:
   bool markReadSwitchingFeed_;
   bool markReadClosingTab_;
   bool markReadMinimize_;
-  bool showDescriptionNews_;
   bool alternatingRowColorsNews_;
   bool simplifiedDateTime_;
   bool notDeleteStarred_;
@@ -226,22 +210,17 @@ public:
   bool avoidOldNews_;
   QDate avoidedOldNewsDate_;
 
-  bool autoLoadImages_;
   bool openLinkInBackground_;
   bool isOpeningLink_;  //!< Flag - link is being opened
-  bool openLinkInBackgroundEmbedded_;
 
   int externalBrowserOn_;
   QString externalBrowser_;
-  bool javaScriptEnable_;
-  bool pluginsEnable_;
-  int maxPagesInCache_;
+
+  // No embedded browser; splitter always uses vertical orientation.
+
   QString downloadLocation_;
   bool askDownloadLocation_;
-  int defaultZoomPages_;
 
-  int newsLayout_;
-  int browserPosition_;
 
   QString newsFilterStr;
 
@@ -386,8 +365,6 @@ private slots:
   void slotTabCurrentChanged(int index);
   void slotTabMoved(int fromIndex, int toIndex);
   void feedsColumnVisible(QAction *action);
-  void setNewsLayout(QAction *action);
-  void setNewsLayout();
 
   void slotNewsUpPressed();
   void slotNewsDownPressed();
@@ -540,9 +517,6 @@ private:
   QAction *customizeMainToolbarAct2_;
   QAction *customizeFeedsToolbarAct_;
   QAction *customizeNewsToolbarAct_;
-  QAction *classicLayoutAct_;
-  QAction *newspaperLayoutAct_;
-  QAction *layoutToggle_;
   QAction *systemStyle_;
   QAction *system2Style_;
   QAction *darkStyle_;
@@ -551,10 +525,6 @@ private:
   QAction *purpleStyle_;
   QAction *pinkStyle_;
   QAction *grayStyle_;
-  QAction *topBrowserPositionAct_;
-  QAction *bottomBrowserPositionAct_;
-  QAction *rightBrowserPositionAct_;
-  QAction *leftBrowserPositionAct_;
   QAction *showCleanUpWizardAct_;
   QAction *showDownloadManagerAct_;
   QAction *setNewsFiltersAct_;
@@ -598,14 +568,9 @@ private:
   QAction *openFeedNewTabAct_;
   QAction *placeToTrayAct_;
 
-  QAction *zoomInAct_;
-  QAction *zoomOutAct_;
-  QAction *zoomTo100Act_;
 
   QActionGroup *customizeToolbarGroup_;
-  QActionGroup *layoutGroup_;
   QActionGroup *styleGroup_;
-  QActionGroup *browserPositionGroup_;
   QActionGroup *feedsFilterGroup_;
   QActionGroup *newsSortByColumnGroup_;
   QActionGroup *newsSortOrderGroup_;
@@ -634,15 +599,12 @@ private:
 
   QMenu *fileMenu_;
   QMenu *newMenu_;
+  QMenu *feedMenu_;
+  QMenu *newsMenu_;
   QMenu *viewMenu_;
   QMenu *toolbarsMenu_;
   QMenu *customizeToolbarMenu_;
-  QMenu *layoutMenu_;
   QMenu *styleMenu_;
-  QMenu *browserPositionMenu_;
-  QMenu *feedMenu_;
-  QMenu *newsMenu_;
-  QMenu *browserMenu_;
   QMenu *toolsMenu_;
   QMenu *helpMenu_;
   QMenu *trayMenu_;
@@ -758,8 +720,6 @@ private:
   bool recountCategoryCountsOn_;
 
   OptionsDialog *optionsDialog_;
-
-  AdBlockIcon* adblockIcon_;
 
 };
 

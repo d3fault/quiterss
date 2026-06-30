@@ -36,11 +36,6 @@
 
 class MainWindow;
 
-#define TOP_POSITION    0
-#define BOTTOM_POSITION 1
-#define RIGHT_POSITION  2
-#define LEFT_POSITION   3
-
 #define RESIZESTEP 25   // News list/browser size step
 
 class NewsTabWidget : public QWidget
@@ -53,15 +48,14 @@ public:
     TabTypeStar,
     TabTypeDel,
     TabTypeLabel,
-    TabTypeWeb,
     TabTypeDownloads
   };
 
-  enum RefreshNewspaper {
+  enum RefreshType {
     RefreshAll,
-    RefreshInsert,
     RefreshWithPos
   };
+
 
   explicit NewsTabWidget(QWidget *parent, TabType type, int feedId = -1, int feedParId = -1);
   ~NewsTabWidget();
@@ -70,7 +64,6 @@ public:
 
   void retranslateStrings();
   void setSettings(bool init = true, bool newTab = true);
-  void setNewsLayout();
   void markNewsRead();
   void markAllNewsRead();
   void markNewsStar();
@@ -86,7 +79,6 @@ public:
   void openInExternalBrowserNews();
   void openNewsNewTab();
 
-  void loadNewspaper(int refresh = RefreshAll);
   QString getLinkNews(int row);
 
   void reduceNewsList();
@@ -108,7 +100,6 @@ public:
   int feedId_;
   int feedParId_;
   int currentNewsIdOld;
-  bool autoLoadImages_;
   int labelId_;
   QString categoryFilterStr_;
 
@@ -153,26 +144,12 @@ private slots:
   void slotSetItemStar(QModelIndex index, int starred);
   void slotMarkReadTimeout();
 
-  void webHomePage();
-  void openPageInExternalBrowser();
-  void slotLinkClicked(QUrl url);
-  void slotLinkHovered(const QString &link, const QString &str1="", const QString &str2="");
-  void slotLoadStarted();
-  void slotLoadFinished(bool);
-  void openUrlInExternalBrowser();
-
   void slotTabClose();
-  void webTitleChanged(QString title);
-  void openLink();
-  void openLinkInNewTab();
 
   void slotNewslLabelClicked(QModelIndex index);
 
 private:
   void createNewsList();
-  void createWebWidget();
-  QString getHtmlLabels(int row);
-  void actionNewspaper(QUrl url);
 
   MainWindow *mainWindow_;
   QSqlDatabase db_;
@@ -181,28 +158,9 @@ private:
   FeedsProxyModel *feedsProxyModel_;
   FeedsView *feedsView_;
 
-  QAction *webExternalBrowserAct_;
-  QAction *urlExternalBrowserAct_;
-
   QTimer *markNewsReadTimer_;
 
-  int webDefaultFontSize_;
-  int webDefaultFixedFontSize_;
-
-  QUrl linkUrl_;
-  QString linkNewsString_;
-
   QWidget *newsPanelWidget_;
-  bool webToolbarShow_;
-
-  QString newspaperHeadHtml_;
-  QString newspaperHtml_;
-  QString newspaperHtmlRtl_;
-  QString htmlString_;
-  QString htmlRtlString_;
-  QString cssString_;
-  QString audioPlayerHtml_;
-  QString videoPlayerHtml_;
 
 };
 
