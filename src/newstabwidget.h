@@ -35,6 +35,7 @@
 #include "newsview.h"
 
 class MainWindow;
+class YoutubeServer;
 
 #define RESIZESTEP 25   // News list/browser size step
 
@@ -66,6 +67,7 @@ public:
   void setSettings(bool init = true, bool newTab = true);
   void markNewsRead();
   void markAllNewsRead();
+  void viewAllYoutubeVideos();
   void markNewsStar();
   void setLabelNews(int labelId);
   void deleteNews();
@@ -162,6 +164,7 @@ private:
 
   QWidget *newsPanelWidget_;
 
+  class YoutubeServer *youtubeServer_;
 };
 
 #endif // NEWSTABWIDGET_H

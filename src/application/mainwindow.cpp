@@ -548,6 +548,8 @@ void MainWindow::createFeedsWidget()
           this, SLOT(clearDeleted()));
   connect(categoriesTree_, SIGNAL(signalMarkRead(QTreeWidgetItem*)),
           this, SLOT(slotMarkReadCategory(QTreeWidgetItem*)));
+  connect(categoriesTree_, SIGNAL(signalViewAllYoutubeVideos()),
+          this, SLOT(viewAllYoutubeVideos()));
   connect(showCategoriesButton_, SIGNAL(clicked()),
           this, SLOT(showNewsCategoriesTree()));
   connect(feedsSplitter_, SIGNAL(splitterMoved(int,int)),
@@ -6936,6 +6938,11 @@ void MainWindow::slotMarkReadCategory(QTreeWidgetItem *item)
     emit signalMarkReadCategory(type, labelId);
     recountCategoryCounts();
   }
+}
+
+void MainWindow::viewAllYoutubeVideos()
+{
+  currentNewsTab->viewAllYoutubeVideos();
 }
 
 /** @brief Show/Hide categories tree

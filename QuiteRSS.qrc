@@ -94,6 +94,9 @@
         <file>HISTORY_EN</file>
         <file>HISTORY_RU</file>
     </qresource>
+    <qresource prefix="/html">
+        <file alias="sequential_youtube_player">html/sequential_youtube_player.html</file>
+    </qresource>
     <qresource prefix="/flags">
         <file alias="flag_AR">images/flags/flag_arab.png</file>
         <file alias="flag_BR">images/flags/flag_brazil.png</file>
