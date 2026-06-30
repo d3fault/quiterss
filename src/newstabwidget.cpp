@@ -391,6 +391,8 @@ void NewsTabWidget::slotNewsViewSelected(QModelIndex index, bool clicked)
 
       mainWindow_->categoriesTree_->currentItem()->setText(3, QString::number(newsId));
     }
+
+    mainWindow_->statusBar()->showMessage(getLinkNews(index.row()), 3000);
   }
   currentNewsIdOld = newsId;
 }
