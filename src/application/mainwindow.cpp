@@ -3612,8 +3612,7 @@ void MainWindow::initUpdateFeeds()
     }
   }
 
-  qint64 currentTimestamp = QDateTime::currentSecsSinceEpoch();
-  q.exec("SELECT id, updateInterval, updateIntervalType, updated FROM feeds WHERE xmlUrl != '' AND updateIntervalEnable == 1");
+  q.exec("SELECT id, updateInterval, updateIntervalType FROM feeds WHERE xmlUrl != '' AND updateIntervalEnable == 1");
   while (q.next()) {
     int updateInterval = q.value(1).toInt();
     int updateIntervalType = q.value(2).toInt();
@@ -3623,22 +3622,7 @@ void MainWindow::initUpdateFeeds()
       updateInterval = updateInterval*60*60;
 
     updateFeedsIntervalSec_.insert(q.value(0).toInt(), updateInterval);
-    int updateFeedsTimeCountInitialValue = 0;
-
-    //check update interval against lastUpdate. see if update interval has elapsed since lastUpdate while the application was closed
-    QString lastUpdate = q.value(3).toString();
-    if (!lastUpdate.isEmpty()) {
-      QDateTime lastUpdateDateTime = QDateTime::fromString(lastUpdate, Qt::ISODate);
-      if (lastUpdateDateTime.isValid()) {
-        lastUpdateDateTime.setTimeSpec(Qt::UTC);
-        qint64 lastUpdateTimestamp = lastUpdateDateTime.toSecsSinceEpoch();
-        if (currentTimestamp > (lastUpdateTimestamp + updateInterval)) {
-          updateFeedsTimeCountInitialValue = updateInterval + 1; //indirectly trigger update using existing infrastructure (to avoid refactor)
-        }
-      }
-    }
-
-    updateFeedsTimeCount_.insert(q.value(0).toInt(), updateFeedsTimeCountInitialValue);
+    updateFeedsTimeCount_.insert(q.value(0).toInt(), 0);
   }
 
   int updateInterval = updateFeedsInterval_;
