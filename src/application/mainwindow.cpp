@@ -38,6 +38,8 @@
 #include <QStatusBar>
 #include <qzregexp.h>
 
+#include <QMessageBox>
+
 // ---------------------------------------------------------------------------
 MainWindow::MainWindow(QWidget *parent)
   : QMainWindow(parent)
@@ -2781,6 +2783,13 @@ void MainWindow::slotUpdateFeed(int feedId, bool changed, int newCount, bool fin
     isStartImportFeed_ = false;
   }
 
+  //m_Db.save(feedId, "lastCheckForUpdate", QDateTime::currentDateTimeUtc());
+  QSqlQuery q;
+  q.prepare("UPDATE feeds SET lastCheckForUpdate = ? WHERE id == ?");
+  q.addBindValue(QDateTime::currentDateTimeUtc().toString(Qt::ISODate));
+  q.addBindValue(feedId);
+  q.exec();
+
   if (!changed) {
     emit signalNextUpdate(finish);
     return;
@@ -3610,7 +3619,9 @@ void MainWindow::initUpdateFeeds()
     }
   }
 
-  q.exec("SELECT id, updateInterval, updateIntervalType FROM feeds WHERE xmlUrl != '' AND updateIntervalEnable == 1");
+  qint64 currentTimestamp = QDateTime::currentSecsSinceEpoch();
+  q.exec("SELECT id, updateInterval, updateIntervalType, lastCheckForUpdate FROM feeds WHERE xmlUrl != '' AND updateIntervalEnable == 1");
+  QSet<int> feedIdsWithUpdateScheduled;
   while (q.next()) {
     int updateInterval = q.value(1).toInt();
     int updateIntervalType = q.value(2).toInt();
@@ -3620,7 +3631,23 @@ void MainWindow::initUpdateFeeds()
       updateInterval = updateInterval*60*60;
 
     updateFeedsIntervalSec_.insert(q.value(0).toInt(), updateInterval);
-    updateFeedsTimeCount_.insert(q.value(0).toInt(), 0);
+    int updateFeedsTimeCountInitialValue = 0;
+
+    //check feed specific update interval against lastCheckForUpdate. see if update interval has elapsed since lastCheckForUpdate while the application was closed
+    QString lastCheckForUpdate = q.value(3).toString();
+    if (lastCheckForUpdate.isEmpty()) {
+      lastCheckForUpdate = QDateTime::fromSecsSinceEpoch(1, Qt::UTC).toString(Qt::ISODate);
+    }
+    QDateTime lastCheckForUpdateDateTime = QDateTime::fromString(lastCheckForUpdate, Qt::ISODate);
+    if (lastCheckForUpdateDateTime.isValid()) {
+      lastCheckForUpdateDateTime.setTimeSpec(Qt::UTC);
+      qint64 lastCheckForUpdateTimestamp = lastCheckForUpdateDateTime.toSecsSinceEpoch();
+      if (currentTimestamp > (lastCheckForUpdateTimestamp + updateInterval)) {
+        updateFeedsTimeCountInitialValue = updateInterval + 1; //indirectly trigger update using existing infrastructure (to avoid refactor)
+        feedIdsWithUpdateScheduled.insert(q.value(0).toInt());
+      }
+    }
+    updateFeedsTimeCount_.insert(q.value(0).toInt(), updateFeedsTimeCountInitialValue);
   }
 
   int updateInterval = updateFeedsInterval_;
@@ -3629,6 +3656,30 @@ void MainWindow::initUpdateFeeds()
   else if (updateFeedsIntervalType_ == 1)
     updateInterval = updateInterval*60*60;
   updateIntervalSec_ = updateInterval;
+
+  //check global update interval against lastCheckForUpdate
+  q.exec("SELECT id, lastCheckForUpdate FROM feeds WHERE xmlUrl != ''");
+  while (q.next()) {
+    QString lastCheckForUpdate = q.value(1).toString();
+    if (lastCheckForUpdate.isEmpty()) {
+      lastCheckForUpdate = QDateTime::fromSecsSinceEpoch(1, Qt::UTC).toString(Qt::ISODate);
+    }
+    QDateTime lastCheckForUpdateDateTime = QDateTime::fromString(lastCheckForUpdate, Qt::ISODate);
+    if (lastCheckForUpdateDateTime.isValid()) {
+      lastCheckForUpdateDateTime.setTimeSpec(Qt::UTC);
+      qint64 lastCheckForUpdateTimestamp = lastCheckForUpdateDateTime.toSecsSinceEpoch();
+      if (updateFeedsEnable_ && (currentTimestamp > (lastCheckForUpdateTimestamp + updateIntervalSec_))) {
+        int feedId = q.value(0).toInt();
+        if (!feedIdsWithUpdateScheduled.contains(feedId)) {
+          //emit signalGetFeedTimer(feedId); //directly trigger update, unless we scheduled an indirect update a few lines up
+          QMetaObject::invokeMethod(this, [this, feedId] {
+            this->signalGetFeedTimer(feedId);
+          }, Qt::QueuedConnection);
+          QMessageBox::information(this, "asdf", "yay scheduling update feed global shiz");
+        }
+      }
+    }
+  }
 
   updateFeedsTimer_ = new QTimer(this);
   connect(updateFeedsTimer_, SIGNAL(timeout()),
@@ -4792,6 +4843,9 @@ void MainWindow::showFeedPropertiesDlg()
   properties.general.avoidedOldSingleNewsDate =
       feedsModel_->dataField(index, "avoidedOldSingleNewsDate").toDate();
 
+  properties.general.excludeSubPaths =
+      feedsModel_->dataField(index, "excludeSubPaths").toString();
+
   Settings settings;
   settings.beginGroup("NewsHeader");
   QString indexColumnsStr = settings.value("columns").toString();
@@ -4865,6 +4919,13 @@ void MainWindow::showFeedPropertiesDlg()
         Qt::ISODate);
   properties.status.createdTime = dt.addSecs(nTimeShift);
 
+#if 0
+  dt = QDateTime::fromString(
+        feedsModel_->dataField(index, "lastCheckForUpdate").toString(),
+        Qt::ISODate);
+  properties.status.lastCheckForUpdate = dt.addSecs(nTimeShift);
+#endif
+
   dt = QDateTime::fromString(
         feedsModel_->dataField(index, "updated").toString(),
         Qt::ISODate);
@@ -4934,6 +4995,7 @@ void MainWindow::showFeedPropertiesDlg()
   q.addBindValue(properties.general.avoidedOldSingleNewsDate);
   q.addBindValue(properties.authentication.on ? 1 : 0);
   q.addBindValue(properties.general.disableUpdate ? 1 : 0);
+  q.addBindValue(properties.general.excludeSubPaths);
   q.addBindValue(feedId);
   q.exec();
 

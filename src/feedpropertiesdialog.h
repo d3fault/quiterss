@@ -42,6 +42,7 @@ typedef struct {
     bool avoidedOldSingleNewsDateOn; //!< Avoid adding news before this date into the database
     bool addSingleNewsAnyDateOn; //!< Add news with any date into the database
     QDate avoidedOldSingleNewsDate; //!< Date to avoid
+    QString excludeSubPaths; //!< Comma-separated list of sub-paths to exclude from feed
   } general;
 
   //! Autthentication properties
@@ -106,6 +107,7 @@ typedef struct {
     QString description; //!< Feed description
     QDateTime createdTime; //!< Time when feed created
     QDateTime lastDisplayed; //!< Last time that feed displayed
+    //QDateTime lastCheckForUpdate; //!< Time of feed last check for update
     QDateTime lastUpdate; //!< Time of feed last update
     QDateTime lastBuildDate;
     int undeleteCount; //!< Number of all news
@@ -166,6 +168,7 @@ private:
   QCheckBox *addSingleNewsAnyDateOn_;
   QGroupBox *avoidedOldSingleNewsDateOn_;
   QCalendarWidget *avoidedOldSingleNewsDate_;
+  LineEdit *excludeSubPaths_; //!< Comma-separated list of sub-paths to exclude
 
   QWidget *createGeneralTab();
 
