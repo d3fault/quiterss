@@ -51,11 +51,6 @@ public:
     TabTypeDownloads
   };
 
-  enum RefreshType {
-    RefreshAll,
-    RefreshWithPos
-  };
-
 
   explicit NewsTabWidget(QWidget *parent, TabType type, int feedId = -1, int feedParId = -1);
   ~NewsTabWidget();

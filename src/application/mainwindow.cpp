@@ -2851,7 +2851,7 @@ void MainWindow::slotUpdateFeed(int feedId, bool changed, int newCount, bool fin
 
 /** @brief Process updating news list
  *---------------------------------------------------------------------------*/
-void MainWindow::slotUpdateNews(int refresh)
+void MainWindow::slotUpdateNews()
 {
   int newsId = newsModel_->index(
         newsView_->currentIndex().row(), newsModel_->fieldIndex("id")).data(Qt::EditRole).toInt();
@@ -3356,7 +3356,7 @@ void MainWindow::showOptionDlg(int index)
       slotCloseTab(indexTab);
     }
     if ((tabBar_->currentIndex() == indexTab) && (indexTab > 0) && (tabLabelId == 0)) {
-      slotUpdateNews(NewsTabWidget::RefreshWithPos);
+      slotUpdateNews();
     }
   }
 
@@ -5874,7 +5874,7 @@ void MainWindow::slotTabCurrentChanged(int index)
 
     setFeedsFilter(false);
 
-    slotUpdateNews(NewsTabWidget::RefreshWithPos);
+    slotUpdateNews();
     if (widget->isVisible())
       newsView_->setFocus();
     else
@@ -5914,7 +5914,7 @@ void MainWindow::slotTabCurrentChanged(int index)
     newsModel_ = currentNewsTab->newsModel_;
     newsView_ = currentNewsTab->newsView_;
 
-    slotUpdateNews(NewsTabWidget::RefreshWithPos);
+    slotUpdateNews();
     newsView_->setFocus();
 
     int unreadCount = widget->getUnreadCount(categoriesTree_->currentItem()->text(4));
