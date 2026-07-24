@@ -3733,6 +3733,11 @@ void MainWindow::showProgressBar(int maximum)
   progressBar_->setMaximum(maximum);
   progressBar_->show();
 }
+void MainWindow::slotSetValue(int value)
+{
+  if (progressBar_->isVisible())
+    progressBar_->setValue(progressBar_->maximum() - value);
+}
 void MainWindow::showMessageStatusBar(QString message, int timeout)
 {
   statusBar()->showMessage(message, timeout);
