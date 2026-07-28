@@ -257,6 +257,7 @@ public:
   QList<int> idFeedsNotifyList_;
 
 public slots:
+  void slotRefreshNewsView(int nextUnread = -1);
   void restoreFeedsOnStartUp();
   void addFeed();
   void addFolder();
@@ -352,7 +353,6 @@ private slots:
   void showContextMenuToolBar(const QPoint &pos);
   void showFeedPropertiesDlg();
   void slotFeedMenuShow();
-  void slotRefreshNewsView(int nextUnread = -1);
   void slotIconFeedPreparing(QString feedUrl, QByteArray byteArray, QString format);
   void slotIconFeedUpdate(int feedId, QByteArray faviconData);
   void showNewsFiltersDlg(bool newFilter = false);
