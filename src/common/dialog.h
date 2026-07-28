@@ -18,7 +18,7 @@
 #ifndef DIALOG_H
 #define DIALOG_H
 
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
 #include <QtWidgets>
 #else
 #include <QtGui>
@@ -28,7 +28,7 @@ class Dialog : public QDialog
 {
   Q_OBJECT
 public:
-  explicit Dialog(QWidget *parent, Qt::WindowFlags flag = 0);
+  explicit Dialog(QWidget *parent, Qt::WindowFlags flag = Qt::WindowFlags());
 
   QVBoxLayout *mainLayout;
   QVBoxLayout *pageLayout;

@@ -25,7 +25,7 @@
 int main(int argc, char **argv)
 {
   if (globals.logFileOutput_) {
-#if defined(HAVE_QT5)
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
     qInstallMessageHandler(LogFile::msgHandler);
 #else
     qInstallMsgHandler(LogFile::msgHandler);

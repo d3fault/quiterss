@@ -60,7 +60,7 @@ NewsTabWidget::NewsTabWidget(QWidget *parent, TabType type, int feedId, int feed
           this, SLOT(slotTabClose()));
 
   QHBoxLayout *newsTitleLayout = new QHBoxLayout();
-  newsTitleLayout->setMargin(0);
+  newsTitleLayout->setContentsMargins(0, 0, 0, 0);
   newsTitleLayout->setSpacing(0);
   newsTitleLayout->addWidget(newsIconTitle_);
   newsTitleLayout->addSpacing(3);
@@ -91,7 +91,7 @@ NewsTabWidget::NewsTabWidget(QWidget *parent, TabType type, int feedId, int feed
   }
 
   QVBoxLayout *layout = new QVBoxLayout();
-  layout->setMargin(0);
+  layout->setContentsMargins(0, 0, 0, 0);
   layout->setSpacing(0);
   if (type_ == TabTypeDownloads)
     layout->addWidget(mainApp->downloadManager());
@@ -153,7 +153,7 @@ void NewsTabWidget::createNewsList()
                           "newsFilter,Separator,deleteNewsAct";
   QString str = settings.value("Settings/newsToolBar", actionListStr).toString();
 
-  foreach (QString actionStr, str.split(",", QString::SkipEmptyParts)) {
+  foreach (QString actionStr, str.split(",", RSS_SKIP_EMPTY_PARTS)) {
     if (actionStr == "Separator") {
       newsToolBar_->addSeparator();
     } else {
@@ -177,7 +177,7 @@ void NewsTabWidget::createNewsList()
   findText_->setFixedWidth(200);
 
   QHBoxLayout *newsPanelLayout = new QHBoxLayout();
-  newsPanelLayout->setMargin(2);
+  newsPanelLayout->setContentsMargins(2, 2, 2, 2);
   newsPanelLayout->setSpacing(2);
   newsPanelLayout->addWidget(newsToolBar_);
   newsPanelLayout->addStretch(1);
@@ -193,7 +193,7 @@ void NewsTabWidget::createNewsList()
   newsPanelWidget_->hide();
 
   QVBoxLayout *newsLayout = new QVBoxLayout();
-  newsLayout->setMargin(0);
+  newsLayout->setContentsMargins(0, 0, 0, 0);
   newsLayout->setSpacing(0);
   newsLayout->addWidget(newsPanelWidget_);
   newsLayout->addWidget(newsView_);
@@ -1399,7 +1399,7 @@ void NewsTabWidget::slotShareNews(QAction *action)
     QUrl url;
     if (action->objectName() == "emailShareAct") {
       url.setUrl("mailto:");
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
       QUrlQuery urlQuery;
       urlQuery.addQueryItem("subject", title);
       urlQuery.addQueryItem("body", linkString);
@@ -1420,7 +1420,7 @@ void NewsTabWidget::slotShareNews(QAction *action)
       externalApp = true;
     } else if (action->objectName() == "evernoteShareAct") {
       url.setUrl("https://www.evernote.com/clip.action");
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
       QUrlQuery urlQuery;
       urlQuery.addQueryItem("url", linkString);
       urlQuery.addQueryItem("title", title);
@@ -1431,7 +1431,7 @@ void NewsTabWidget::slotShareNews(QAction *action)
 #endif
     } else if (action->objectName() == "facebookShareAct") {
       url.setUrl("https://www.facebook.com/sharer.php");
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
       QUrlQuery urlQuery;
       urlQuery.addQueryItem("u", linkString);
       urlQuery.addQueryItem("t", title);
@@ -1442,7 +1442,7 @@ void NewsTabWidget::slotShareNews(QAction *action)
 #endif
     } else if (action->objectName() == "livejournalShareAct") {
       url.setUrl("http://www.livejournal.com/update.bml");
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
       QUrlQuery urlQuery;
       urlQuery.addQueryItem("event", linkString);
       urlQuery.addQueryItem("subject", title);
@@ -1453,7 +1453,7 @@ void NewsTabWidget::slotShareNews(QAction *action)
 #endif
     } else if (action->objectName() == "pocketShareAct") {
       url.setUrl("https://getpocket.com/save");
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
       QUrlQuery urlQuery;
       urlQuery.addQueryItem("url", linkString);
       urlQuery.addQueryItem("title", title);
@@ -1464,7 +1464,7 @@ void NewsTabWidget::slotShareNews(QAction *action)
 #endif
     } else if (action->objectName() == "twitterShareAct") {
       url.setUrl("https://twitter.com/share");
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
       QUrlQuery urlQuery;
       urlQuery.addQueryItem("url", linkString);
       urlQuery.addQueryItem("text", title);
@@ -1475,7 +1475,7 @@ void NewsTabWidget::slotShareNews(QAction *action)
 #endif
     } else if (action->objectName() == "vkShareAct") {
       url.setUrl("https://vk.com/share.php");
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
       QUrlQuery urlQuery;
       urlQuery.addQueryItem("url", linkString);
       urlQuery.addQueryItem("title", title);
@@ -1490,7 +1490,7 @@ void NewsTabWidget::slotShareNews(QAction *action)
 #endif
     } else if (action->objectName() == "linkedinShareAct") {
       url.setUrl("https://www.linkedin.com/shareArticle?mini=true");
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
       QUrlQuery urlQuery;
       urlQuery.addQueryItem("url", linkString);
       urlQuery.addQueryItem("title", title);
@@ -1501,7 +1501,7 @@ void NewsTabWidget::slotShareNews(QAction *action)
 #endif
     } else if (action->objectName() == "bloggerShareAct") {
       url.setUrl("https://www.blogger.com/blog_this.pyra?t");
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
       QUrlQuery urlQuery;
       urlQuery.addQueryItem("u", linkString);
       urlQuery.addQueryItem("n", title);
@@ -1512,7 +1512,7 @@ void NewsTabWidget::slotShareNews(QAction *action)
 #endif
     } else if (action->objectName() == "printfriendlyShareAct") {
       url.setUrl("https://www.printfriendly.com/print");
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
       QUrlQuery urlQuery;
       urlQuery.addQueryItem("url", linkString);
       url.setQuery(urlQuery);
@@ -1521,7 +1521,7 @@ void NewsTabWidget::slotShareNews(QAction *action)
 #endif
     } else if (action->objectName() == "instapaperShareAct") {
       url.setUrl("https://www.instapaper.com/hello2");
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
       QUrlQuery urlQuery;
       urlQuery.addQueryItem("url", linkString);
       urlQuery.addQueryItem("title", title);
@@ -1532,7 +1532,7 @@ void NewsTabWidget::slotShareNews(QAction *action)
 #endif
     } else if (action->objectName() == "redditShareAct") {
       url.setUrl("https://reddit.com/submit");
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
       QUrlQuery urlQuery;
       urlQuery.addQueryItem("url", linkString);
       urlQuery.addQueryItem("title", title);
@@ -1543,7 +1543,7 @@ void NewsTabWidget::slotShareNews(QAction *action)
 #endif
     } else if (action->objectName() == "hackerNewsShareAct") {
       url.setUrl("http://news.ycombinator.com/submitlink");
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
       QUrlQuery urlQuery;
       urlQuery.addQueryItem("u", linkString);
       urlQuery.addQueryItem("t", title);
@@ -1554,7 +1554,7 @@ void NewsTabWidget::slotShareNews(QAction *action)
 #endif
     } else if (action->objectName() == "telegramShareAct") {
       url.setUrl("tg://msg_url");
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
       QUrlQuery urlQuery;
       urlQuery.addQueryItem("url", linkString);
       urlQuery.addQueryItem("text", title);
@@ -1566,7 +1566,7 @@ void NewsTabWidget::slotShareNews(QAction *action)
       externalApp = true;
     } else if (action->objectName() == "viberShareAct") {
       url.setUrl("viber://forward");
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
       QUrlQuery urlQuery;
       urlQuery.addQueryItem("text", title + "%20" + linkString);
       url.setQuery(urlQuery);

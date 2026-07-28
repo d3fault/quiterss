@@ -103,7 +103,7 @@ QWidget *FeedPropertiesDialog::createGeneralTab()
           updateIntervalType_, SLOT(setEnabled(bool)));
 
   QHBoxLayout *updateFeedsLayout = new QHBoxLayout();
-  updateFeedsLayout->setMargin(0);
+  updateFeedsLayout->setContentsMargins(0, 0, 0, 0);
   updateFeedsLayout->addWidget(updateEnable_);
   updateFeedsLayout->addWidget(updateInterval_);
   updateFeedsLayout->addWidget(updateIntervalType_);
@@ -140,7 +140,7 @@ QWidget *FeedPropertiesDialog::createGeneralTab()
   avoidedOldSingleNewsDate_->setVerticalHeaderFormat(QCalendarWidget::NoVerticalHeader);
   avoidedOldSingleNewsDate_->setHorizontalHeaderFormat(QCalendarWidget::SingleLetterDayNames);
   QHBoxLayout *avoidedOldNewsDateLayout = new QHBoxLayout();
-  avoidedOldNewsDateLayout->setMargin(5);
+  avoidedOldNewsDateLayout->setContentsMargins(5, 5, 5, 5);
   avoidedOldNewsDateLayout->addWidget(avoidedOldSingleNewsDate_);
   avoidedOldNewsDateLayout->addStretch();
 
@@ -150,7 +150,7 @@ QWidget *FeedPropertiesDialog::createGeneralTab()
   avoidedOldSingleNewsDateOn_->setLayout(avoidedOldNewsDateLayout);
 
   QVBoxLayout *tabLayout = new QVBoxLayout(tab);
-  tabLayout->setMargin(10);
+  tabLayout->setContentsMargins(10, 10, 10, 10);
   tabLayout->setSpacing(5);
   tabLayout->addLayout(layoutGeneralGrid);
   tabLayout->addLayout(layoutGeneralHomepage);
@@ -213,7 +213,7 @@ QWidget *FeedPropertiesDialog::createDisplayTab()
   layoutDirection_ = new QCheckBox(tr("Right-to-left layout"));
 
   QVBoxLayout *tabLayout = new QVBoxLayout(tab);
-  tabLayout->setMargin(10);
+  tabLayout->setContentsMargins(10, 10, 10, 10);
   tabLayout->setSpacing(5);
   tabLayout->addWidget(layoutDirection_);
 
@@ -232,8 +232,8 @@ QWidget *FeedPropertiesDialog::createColumnsTab()
   columnsTree_->setColumnCount(2);
   columnsTree_->setColumnHidden(1, true);
   columnsTree_->setSortingEnabled(false);
-  columnsTree_->setHeaderHidden(true);
-#ifdef HAVE_QT5
+ columnsTree_->setHeaderHidden(true);
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
   columnsTree_->header()->setSectionResizeMode(0, QHeaderView::Stretch);
 #else
   columnsTree_->header()->setResizeMode(0, QHeaderView::Stretch);
@@ -251,7 +251,7 @@ QWidget *FeedPropertiesDialog::createColumnsTab()
   sortOrderBox_->addItems(treeItem);
 
   QHBoxLayout *styleLayout = new QHBoxLayout();
-  styleLayout->setMargin(0);
+  styleLayout->setContentsMargins(0, 0, 0, 0);
   styleLayout->addWidget(new QLabel(tr("Sort by:")));
   styleLayout->addWidget(sortByColumnBox_);
   styleLayout->addSpacing(10);
@@ -298,7 +298,7 @@ QWidget *FeedPropertiesDialog::createColumnsTab()
   buttonsVLayout->addStretch();
 
   QHBoxLayout *tabLayout = new QHBoxLayout(tab);
-  tabLayout->setMargin(10);
+  tabLayout->setContentsMargins(10, 10, 10, 10);
   tabLayout->setSpacing(5);
   tabLayout->addLayout(mainVLayout);
   tabLayout->addLayout(buttonsVLayout);
@@ -331,7 +331,7 @@ QWidget *FeedPropertiesDialog::createAuthenticationTab()
   authentication_->setLayout(authenticationLayout);
 
   QVBoxLayout *tabLayout = new QVBoxLayout(tab);
-  tabLayout->setMargin(10);
+  tabLayout->setContentsMargins(10, 10, 10, 10);
   tabLayout->setSpacing(5);
   tabLayout->addWidget(authentication_);
   tabLayout->addStretch(1);
@@ -373,7 +373,7 @@ QWidget *FeedPropertiesDialog::createStatusTab()
   layoutGrid->addWidget(descriptionText_, 5, 1, 1, 1, Qt::AlignTop);
 
   QVBoxLayout *tabLayout = new QVBoxLayout(tab);
-  tabLayout->setMargin(10);
+  tabLayout->setContentsMargins(10, 10, 10, 10);
   tabLayout->setSpacing(5);
   tabLayout->addLayout(layoutGrid);
   tabLayout->addStretch(1);

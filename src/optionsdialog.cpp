@@ -55,7 +55,7 @@ OptionsDialog::OptionsDialog(QWidget *parent)
   categoriesTree_->setColumnHidden(0, true);
   categoriesTree_->header()->setStretchLastSection(false);
   categoriesTree_->header()->resizeSection(2, 5);
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
   categoriesTree_->header()->setSectionResizeMode(1, QHeaderView::Stretch);
 #else
   categoriesTree_->header()->setResizeMode(1, QHeaderView::Stretch);
@@ -168,7 +168,7 @@ OptionsDialog::OptionsDialog(QWidget *parent)
 
 void OptionsDialog::showEvent(QShowEvent*event)
 {
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
   const QRect screenGeometry = QGuiApplication::primaryScreen()->availableGeometry();
 #else
   const QRect screenGeometry = QApplication::desktop()->availableGeometry();
@@ -254,8 +254,8 @@ bool OptionsDialog::eventFilter(QObject *obj, QEvent *event)
           if (!shortcutStr.isEmpty()) {
             for (int i = 0; i < treeItems.count(); i++) {
               if ((treeItems.count() == 2) || (treeItems.at(i)->row() == row)) {
-                treeItems.at(i)->setData(shortcutModel_->item(0, 1)->data(Qt::TextColorRole),
-                                         Qt::TextColorRole);
+                treeItems.at(i)->setData(shortcutModel_->item(0, 1)->data(Qt::ForegroundRole),
+                                         Qt::ForegroundRole);
               }
             }
           }
@@ -273,7 +273,7 @@ bool OptionsDialog::eventFilter(QObject *obj, QEvent *event)
                                           shortcutModel_->item(treeItems.at(i)->row(), 0)->text()
                                           + "'");
               }
-              treeItems.at(i)->setData(QColor(Qt::red), Qt::TextColorRole);
+              treeItems.at(i)->setData(QColor(Qt::red), Qt::ForegroundRole);
             }
           } else {
             warningShortcut_->clear();
@@ -439,7 +439,7 @@ void OptionsDialog::createNetworkConnectionsWidget()
   editPassword_->setEchoMode(QLineEdit::Password);
 
   QHBoxLayout *addrPortLayout = new QHBoxLayout();
-  addrPortLayout->setMargin(0);
+  addrPortLayout->setContentsMargins(0, 0, 0, 0);
   addrPortLayout->addWidget(typeProxy_);
   addrPortLayout->addWidget(new QLabel(tr("Proxy server:")));
   addrPortLayout->addWidget(editHost_);
@@ -450,7 +450,7 @@ void OptionsDialog::createNetworkConnectionsWidget()
   addrPortWidget->setLayout(addrPortLayout);
 
   QHBoxLayout *userPasswordLayout = new QHBoxLayout();
-  userPasswordLayout->setMargin(0);
+  userPasswordLayout->setContentsMargins(0, 0, 0, 0);
   userPasswordLayout->addWidget(new QLabel(tr("Username:")));
   userPasswordLayout->addWidget(editUser_);
   userPasswordLayout->addWidget(new QLabel(tr("Password:")));
@@ -460,7 +460,7 @@ void OptionsDialog::createNetworkConnectionsWidget()
   userPasswordWidget->setLayout(userPasswordLayout);
 
   QVBoxLayout *manualLayout = new QVBoxLayout();
-  manualLayout->setMargin(0);
+  manualLayout->setContentsMargins(0, 0, 0, 0);
   manualLayout->addWidget(addrPortWidget);
   manualLayout->addWidget(userPasswordWidget);
   manualLayout->addStretch();
@@ -524,7 +524,7 @@ void OptionsDialog::createBrowserWidget()
   externalBrowserBox->addButton(otherExternalBrowserOn_);
 
   QVBoxLayout *browserLayoutV = new QVBoxLayout();
-  browserLayoutV->setMargin(10);
+  browserLayoutV->setContentsMargins(10, 10, 10, 10);
   browserLayoutV->addWidget(new QLabel(tr("External browser:")));
   browserLayoutV->addLayout(externalBrowserLayout);
   browserLayoutV->addWidget(openLinkInBackground_);
@@ -563,7 +563,7 @@ void OptionsDialog::createBrowserWidget()
   downLocationLayout->addWidget(askDownloadLocation_, 1, 0);
 
   QVBoxLayout *downloadsLayout = new QVBoxLayout();
-  downloadsLayout->setMargin(10);
+  downloadsLayout->setContentsMargins(10, 10, 10, 10);
   downloadsLayout->addWidget(new QLabel(tr("Download location:")));
   downloadsLayout->addLayout(downLocationLayout);
   downloadsLayout->addStretch();
@@ -599,7 +599,7 @@ void OptionsDialog::createFeedsWidget()
           updateIntervalType_, SLOT(setEnabled(bool)));
 
   QHBoxLayout *updateFeedsLayout = new QHBoxLayout();
-  updateFeedsLayout->setMargin(0);
+  updateFeedsLayout->setContentsMargins(0, 0, 0, 0);
   updateFeedsLayout->addWidget(updateFeedsEnable_);
   updateFeedsLayout->addWidget(updateFeedsInterval_);
   updateFeedsLayout->addWidget(updateIntervalType_);
@@ -625,7 +625,7 @@ void OptionsDialog::createFeedsWidget()
   avoidedOldNewsDate_->setVerticalHeaderFormat(QCalendarWidget::NoVerticalHeader);
   avoidedOldNewsDate_->setHorizontalHeaderFormat(QCalendarWidget::SingleLetterDayNames);
   QHBoxLayout *avoidedOldNewsDateLayout = new QHBoxLayout();
-  avoidedOldNewsDateLayout->setMargin(5);
+  avoidedOldNewsDateLayout->setContentsMargins(5, 5, 5, 5);
   avoidedOldNewsDateLayout->addWidget(avoidedOldNewsDate_);
   avoidedOldNewsDateLayout->addStretch();
 
@@ -675,7 +675,7 @@ void OptionsDialog::createFeedsWidget()
   formatTime_->setItemData(3, "hh:mm:ss AP");
 
   QHBoxLayout *formatDateLayout = new QHBoxLayout();
-  formatDateLayout->setMargin(0);
+  formatDateLayout->setContentsMargins(0, 0, 0, 0);
   formatDateLayout->addWidget(new QLabel(tr("Display format for date:")));
   formatDateLayout->addWidget(formatDate_);
   formatDateLayout->addSpacing(10);
@@ -703,7 +703,7 @@ void OptionsDialog::createFeedsWidget()
   mainNewsFilter_->setItemData(7, "filterNewsLastWeek_");
 
   QHBoxLayout *mainNewsFilterLayout = new QHBoxLayout();
-  mainNewsFilterLayout->setMargin(0);
+  mainNewsFilterLayout->setContentsMargins(0, 0, 0, 0);
   mainNewsFilterLayout->addWidget(new QLabel(tr("Default news filter:")));
   mainNewsFilterLayout->addWidget(mainNewsFilter_);
   mainNewsFilterLayout->addStretch();
@@ -744,7 +744,7 @@ void OptionsDialog::createFeedsWidget()
         connect(markCurNewsRead_, SIGNAL(toggled(bool)),
           markNewsReadTime_, SLOT(setEnabled(bool)));
 
-        curLayout->setMargin(0);
+        curLayout->setContentsMargins(0, 0, 0, 0);
         curLayout->addWidget(markCurNewsRead_);
         curLayout->addWidget(markNewsReadTime_);
         curLayout->addWidget(new QLabel(tr("seconds")));
@@ -888,7 +888,7 @@ void OptionsDialog::createLabelsWidget()
   buttonsLayout->addStretch();
 
   QHBoxLayout *labelsLayout = new QHBoxLayout();
-  labelsLayout->setMargin(0);
+  labelsLayout->setContentsMargins(0, 0, 0, 0);
   labelsLayout->addWidget(labelsTree_);
   labelsLayout->addLayout(buttonsLayout);
 
@@ -913,7 +913,7 @@ void OptionsDialog::createNotifierWidget()
 
   screenNotify_ = new QComboBox();
 
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
   const int screenCount = QApplication::screens().size();
 #else
   const int screenCount = QApplication::desktop()->screenCount();
@@ -1005,7 +1005,7 @@ void OptionsDialog::createNotifierWidget()
           feedsNotifierDlg_, SLOT(exec()));
 
   QVBoxLayout *notificationLayoutV = new QVBoxLayout();
-  notificationLayoutV->setMargin(10);
+  notificationLayoutV->setContentsMargins(10, 10, 10, 10);
   notificationLayoutV->addLayout(notifierLayout1);
   notificationLayoutV->addWidget(fullscreenModeNotify_);
   notificationLayoutV->addWidget(showNotifyInactiveApp_);
@@ -1044,7 +1044,7 @@ void OptionsDialog::createNotifierWidget()
   soundNotifyLayoutH->addWidget(playSoundNotifer_);
 
   QVBoxLayout *soundNotifyLayout = new QVBoxLayout(soundNotifyBox_);
-  soundNotifyLayout->setMargin(10);
+  soundNotifyLayout->setContentsMargins(10, 10, 10, 10);
   soundNotifyLayout->addLayout(soundNotifyLayoutH);
   soundNotifyLayout->addStretch(1);
 
@@ -1140,7 +1140,7 @@ void OptionsDialog::createPasswordsWidget()
   passButtonLayout->addStretch(1);
 
   QHBoxLayout *passLayout = new QHBoxLayout();
-  passLayout->setMargin(0);
+  passLayout->setContentsMargins(0, 0, 0, 0);
   passLayout->addWidget(passTree_);
   passLayout->addLayout(passButtonLayout);
 
@@ -1428,7 +1428,7 @@ void OptionsDialog::createLanguageWidget()
   linkTranslators->setOpenExternalLinks(true);
 
   QVBoxLayout *languageLayout = new QVBoxLayout();
-  languageLayout->setMargin(0);
+  languageLayout->setContentsMargins(0, 0, 0, 0);
   languageLayout->addWidget(new QLabel(tr("Choose language:")));
   languageLayout->addWidget(languageFileList_);
   languageLayout->addWidget(linkTranslators);
@@ -1702,7 +1702,7 @@ void OptionsDialog::createShortcutWidget()
   warningShortcut_ = new QLabel();
 
   QVBoxLayout *shortcutLayout = new QVBoxLayout();
-  shortcutLayout->setMargin(0);
+  shortcutLayout->setContentsMargins(0, 0, 0, 0);
   shortcutLayout->addWidget(filterShortcut_);
   shortcutLayout->addWidget(shortcutTree_, 1);
   shortcutLayout->addWidget(warningShortcut_);
@@ -1964,7 +1964,7 @@ void OptionsDialog::loadActionShortcut(QList<QAction *> actions, QStringList *li
     treeItems = shortcutModel_->findItems(str, Qt::MatchFixedString, 2);
     if ((treeItems.count() > 1) && !str.isEmpty()) {
       for (int i = 0; i < treeItems.count(); i++) {
-        treeItems.at(i)->setData(QColor(Qt::red), Qt::TextColorRole);
+        treeItems.at(i)->setData(QColor(Qt::red), Qt::ForegroundRole);
       }
     }
   }
@@ -2017,8 +2017,8 @@ void OptionsDialog::slotClearShortcut()
   if ((treeItems.count() > 1) && !str.isEmpty()) {
     for (int i = 0; i < treeItems.count(); i++) {
       if ((treeItems.count() == 2) || (treeItems.at(i)->row() == row)) {
-        treeItems.at(i)->setData(shortcutModel_->item(0, 1)->data(Qt::TextColorRole),
-                                 Qt::TextColorRole);
+        treeItems.at(i)->setData(shortcutModel_->item(0, 1)->data(Qt::ForegroundRole),
+                                 Qt::ForegroundRole);
       }
     }
   }
@@ -2043,8 +2043,8 @@ void OptionsDialog::slotResetShortcut()
   if (!str.isEmpty()) {
     for (int i = 0; i < treeItems.count(); i++) {
       if ((treeItems.count() == 2) || (treeItems.at(i)->row() == row)) {
-        treeItems.at(i)->setData(shortcutModel_->item(0, 1)->data(Qt::TextColorRole),
-                                 Qt::TextColorRole);
+        treeItems.at(i)->setData(shortcutModel_->item(0, 1)->data(Qt::ForegroundRole),
+                                 Qt::ForegroundRole);
       }
     }
   }
@@ -2065,7 +2065,7 @@ void OptionsDialog::slotResetShortcut()
                                   "'");
       }
       if (treeItems.count() > 1) {
-        treeItems.at(i)->setData(QColor(Qt::red), Qt::TextColorRole);
+        treeItems.at(i)->setData(QColor(Qt::red), Qt::ForegroundRole);
       }
     }
   }

@@ -44,6 +44,14 @@
 #define QL1C(x) QLatin1Char(x)
 #endif
 
+#ifndef RSS_DATE_START_OF_DAY
+#if QT_VERSION >= 0x050E00
+#define RSS_DATE_START_OF_DAY(d) ((d).startOfDay())
+#else
+#define RSS_DATE_START_OF_DAY(d) (QDateTime(d))
+#endif
+#endif
+
 namespace Common
 {
 #if defined(Q_OS_WIN) || defined(Q_OS_OS2)

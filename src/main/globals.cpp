@@ -17,7 +17,7 @@
 * ============================================================ */
 #include "globals.h"
 
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
 #include <QStandardPaths>
 #else
 #include <QDesktopServices>
@@ -70,8 +70,8 @@ void Globals::init()
     cacheDir_ = "cache";
     soundNotifyDir_ = "sound";
   } else {
-#ifdef HAVE_QT5
-    dataDir_ = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
+    dataDir_ = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     cacheDir_ = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
 #else
     dataDir_ = QDesktopServices::storageLocation(QDesktopServices::DataLocation);

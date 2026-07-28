@@ -30,6 +30,12 @@
 #include "newsfiltersdialog.h"
 #include "settings.h"
 
+#ifdef HAVE_QT6
+#include <QtCore5Compat/QTextCodec>
+#else
+#include <QTextCodec>
+#endif
+
 #if defined(Q_OS_WIN)
 #include <windows.h>
 #include <psapi.h>
@@ -421,8 +427,8 @@ void MainWindow::createFeedsWidget()
 
   for (int i = 0; i < feedsView_->model()->columnCount(); ++i)
     feedsView_->hideColumn(i);
-  feedsView_->showColumn(feedsView_->columnIndex("text"));
-#ifdef HAVE_QT5
+ feedsView_->showColumn(feedsView_->columnIndex("text"));
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
   feedsView_->header()->setSectionResizeMode(feedsView_->columnIndex("text"), QHeaderView::Stretch);
   feedsView_->header()->setSectionResizeMode(feedsView_->columnIndex("unread"), QHeaderView::ResizeToContents);
   feedsView_->header()->setSectionResizeMode(feedsView_->columnIndex("undeleteCount"), QHeaderView::ResizeToContents);
@@ -439,7 +445,7 @@ void MainWindow::createFeedsWidget()
   feedsToolBar_->setStyleSheet("QToolBar { border: none; padding: 0px; }");
 
   QHBoxLayout *feedsPanelLayout = new QHBoxLayout();
-  feedsPanelLayout->setMargin(2);
+  feedsPanelLayout->setContentsMargins(2, 2, 2, 2);
   feedsPanelLayout->addWidget(feedsToolBar_, 1);
 
   feedsPanel_ = new QWidget(this);
@@ -451,7 +457,7 @@ void MainWindow::createFeedsWidget()
 
   findFeeds_ = new FindFeed(this);
   QVBoxLayout *findFeedsLayout = new QVBoxLayout();
-  findFeedsLayout->setMargin(2);
+  findFeedsLayout->setContentsMargins(2, 2, 2, 2);
   findFeedsLayout->addWidget(findFeeds_);
   findFeedsWidget_ = new QWidget(this);
   findFeedsWidget_->hide();
@@ -468,7 +474,7 @@ void MainWindow::createFeedsWidget()
   showCategoriesButton_->setAutoRaise(true);
 
   QHBoxLayout *categoriesPanelLayout = new QHBoxLayout();
-  categoriesPanelLayout->setMargin(2);
+  categoriesPanelLayout->setContentsMargins(2, 2, 2, 2);
   categoriesPanelLayout->addSpacing(2);
   categoriesPanelLayout->addWidget(categoriesLabel_, 1);
   categoriesPanelLayout->addWidget(showCategoriesButton_);
@@ -478,7 +484,7 @@ void MainWindow::createFeedsWidget()
   categoriesPanel_->setLayout(categoriesPanelLayout);
 
   QVBoxLayout *categoriesLayout = new QVBoxLayout();
-  categoriesLayout->setMargin(0);
+  categoriesLayout->setContentsMargins(0, 0, 0, 0);
   categoriesLayout->setSpacing(0);
   categoriesLayout->addWidget(categoriesPanel_);
   categoriesLayout->addWidget(categoriesTree_, 1);
@@ -498,11 +504,15 @@ void MainWindow::createFeedsWidget()
 
 #define CATEGORIES_HEIGHT 210
   QList <int> sizes;
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
+  sizes << QGuiApplication::primaryScreen()->availableGeometry().height() << CATEGORIES_HEIGHT;
+#else
   sizes << QApplication::desktop()->height() << CATEGORIES_HEIGHT;
+#endif
   feedsSplitter_->setSizes(sizes);
 
   QVBoxLayout *feedsLayout = new QVBoxLayout();
-  feedsLayout->setMargin(0);
+  feedsLayout->setContentsMargins(0, 0, 0, 0);
   feedsLayout->setSpacing(0);
   feedsLayout->addWidget(feedsPanel_);
   feedsLayout->addWidget(findFeedsWidget_);
@@ -703,7 +713,11 @@ void MainWindow::createCentralWidget()
 
 #define FEEDS_WIDTH 180
   QList <int> sizes;
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
+  sizes << FEEDS_WIDTH << QGuiApplication::primaryScreen()->availableGeometry().width();
+#else
   sizes << FEEDS_WIDTH << QApplication::desktop()->width();
+#endif
   mainSplitter_->setSizes(sizes);
 
   QHBoxLayout *mainLayout1 = new QHBoxLayout();
@@ -711,7 +725,7 @@ void MainWindow::createCentralWidget()
   mainLayout1->addWidget(mainSplitter_, 1);
 
   QVBoxLayout *mainLayout = new QVBoxLayout();
-  mainLayout->setMargin(0);
+  mainLayout->setContentsMargins(0, 0, 0, 0);
   mainLayout->setSpacing(0);
   mainLayout->addWidget(tabBarWidget_);
   mainLayout->addLayout(mainLayout1, 1);
@@ -1392,7 +1406,11 @@ void MainWindow::createShortcut()
 {
   addFeedAct_->setShortcut(QKeySequence(QKeySequence::New));
   listActions_.append(addFeedAct_);
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
+  addFolderAct_->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_N));
+#else
   addFolderAct_->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_N));
+#endif
   listActions_.append(addFolderAct_);
   listActions_.append(deleteFeedAct_);
   listActions_.append(createBackupAct_);
@@ -1456,7 +1474,11 @@ void MainWindow::createShortcut()
 
   switchFocusAct_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Tab));
   listActions_.append(switchFocusAct_);
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
+  switchFocusPrevAct_->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Tab));
+#else
   switchFocusPrevAct_->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Tab));
+#endif
   listActions_.append(switchFocusPrevAct_);
 
   feedsWidgetVisibleAct_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_D));
@@ -1890,7 +1912,7 @@ void MainWindow::loadSettings()
                                "newAct,Separator,updateFeedAct,updateAllFeedsAct,"
                                "Separator,markFeedRead").toString();
 
-  foreach (QString actionStr, str.split(",", QString::SkipEmptyParts)) {
+  foreach (QString actionStr, str.split(",", RSS_SKIP_EMPTY_PARTS)) {
     if (actionStr == "Separator") {
       mainToolbar_->addSeparator();
     } else {
@@ -1911,7 +1933,7 @@ void MainWindow::loadSettings()
                                "newAct,Separator,updateAllFeedsAct,markFeedRead,"
                                "Separator,feedsFilter,findFeedAct").toString();
 
-  foreach (QString actionStr, str.split(",", QString::SkipEmptyParts)) {
+  foreach (QString actionStr, str.split(",", RSS_SKIP_EMPTY_PARTS)) {
     if (actionStr == "Separator") {
       feedsToolBar_->addSeparator();
     } else {
@@ -2034,7 +2056,11 @@ void MainWindow::loadSettings()
     showCategoriesButton_->setIcon(QIcon(":/images/images/panel_show.png"));
     showCategoriesButton_->setToolTip(tr("Show Categories"));
     QList <int> sizes;
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
+    sizes << QGuiApplication::primaryScreen()->availableGeometry().height() << 20;
+#else
     sizes << QApplication::desktop()->height() << 20;
+#endif
     feedsSplitter_->setSizes(sizes);
   }
   bool expandCategories = settings.value("categoriesTreeExpanded", true).toBool();
@@ -2556,8 +2582,8 @@ void MainWindow::slotExportFeeds()
 // ----------------------------------------------------------------------------
 void MainWindow::slotFeedsViewportUpdate()
 {
-  feedsView_->viewport()->update();
-#ifdef HAVE_QT5
+ feedsView_->viewport()->update();
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
   feedsView_->header()->setSectionResizeMode(feedsView_->columnIndex("unread"), QHeaderView::ResizeToContents);
   feedsView_->header()->setSectionResizeMode(feedsView_->columnIndex("undeleteCount"), QHeaderView::ResizeToContents);
   feedsView_->header()->setSectionResizeMode(feedsView_->columnIndex("updated"), QHeaderView::ResizeToContents);
@@ -2690,7 +2716,7 @@ void MainWindow::slotRecountCategoryCounts(QList<int> deletedList, QList<int> st
       }
       QString idString = labelList.at(i);
       if (!idString.isEmpty() && idString != ",") {
-        QStringList idList = idString.split(",", QString::SkipEmptyParts);
+        QStringList idList = idString.split(",", RSS_SKIP_EMPTY_PARTS);
         foreach (QString idStr, idList) {
           int id = idStr.toInt();
           if (allCountList.contains(id)) {
@@ -4805,7 +4831,7 @@ void MainWindow::showFeedPropertiesDlg()
   Settings settings;
   settings.beginGroup("NewsHeader");
   QString indexColumnsStr = settings.value("columns").toString();
-  QStringList indexColumnsList = indexColumnsStr.split(",", QString::SkipEmptyParts);
+  QStringList indexColumnsList = indexColumnsStr.split(",", RSS_SKIP_EMPTY_PARTS);
   foreach (QString indexStr, indexColumnsList) {
     properties.columnDefault.columns.append(indexStr.toInt());
   }
@@ -4842,7 +4868,7 @@ void MainWindow::showFeedPropertiesDlg()
       properties.column.nameList.append(nextAction->text());
     }
     indexColumnsStr = feedsModel_->dataField(index, "columns").toString();
-    indexColumnsList = indexColumnsStr.split(",", QString::SkipEmptyParts);
+    indexColumnsList = indexColumnsStr.split(",", RSS_SKIP_EMPTY_PARTS);
     foreach (QString indexStr, indexColumnsList) {
       properties.column.columns.append(indexStr.toInt());
     }
@@ -5385,7 +5411,22 @@ void MainWindow::slotPlaySound(const QString &path)
   bool useMediaPlayer = settings.value("Settings/useMediaPlayer", true).toBool();
 
   if (useMediaPlayer) {
-#ifdef HAVE_QT5
+#ifdef HAVE_QT6
+    if (mediaPlayer_ == NULL) {
+      mediaPlayer_ = new QMediaPlayer(this);
+      audioOutput_ = new QAudioOutput(this);
+      mediaPlayer_->setAudioOutput(audioOutput_);
+      connect(mediaPlayer_, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)),
+              this, SLOT(mediaStatusChanged(QMediaPlayer::MediaStatus)));
+      connect(mediaPlayer_, SIGNAL(errorOccurred(QMediaPlayer::Error)),
+              this, SLOT(mediaError(QMediaPlayer::Error)));
+    }
+
+    mediaPlayer_->setSource(QUrl::fromLocalFile(soundPath));
+    mediaPlayer_->play();
+
+    playing = true;
+#elif defined(HAVE_QT5)
     if (mediaPlayer_ == NULL) {
       playlist_ = new QMediaPlaylist(this);
       mediaPlayer_ = new QMediaPlayer(this);
@@ -5432,21 +5473,38 @@ void MainWindow::slotPlaySound(const QString &path)
 
   if (!playing) {
 #if defined(Q_OS_WIN) || defined(Q_OS_OS2)
+#ifdef HAVE_QT6
+    QSoundEffect *effect = new QSoundEffect(this);
+    effect->setSource(QUrl::fromLocalFile(soundPath));
+    effect->play();
+#else
     QSound::play(soundPath);
+#endif
 #else
     QProcess::startDetached(QString("play %1").arg(soundPath));
 #endif
   }
 }
 
-#ifdef HAVE_QT5
+#ifdef HAVE_QT6
+void MainWindow::mediaStatusChanged(QMediaPlayer::MediaStatus status)
+{
+  if (status == QMediaPlayer::EndOfMedia) {
+    mediaPlayer_->stop();
+    mediaPlayer_->setSource(QUrl());
+  }
+}
+
+#elif defined(HAVE_QT5)
 void MainWindow::mediaStatusChanged(QMediaPlayer::MediaStatus status)
 {
   if (status == QMediaPlayer::EndOfMedia) {
     playlist_->removeMedia(0);
   }
 }
+#endif
 
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
 void MainWindow::mediaError(QMediaPlayer::Error error)
 {
   QTextCodec *codec = QTextCodec::codecForLocale();
@@ -6201,7 +6259,7 @@ void MainWindow::showNotification(bool bShowRecentNews/*=false*/)
     GetWindowRect(GetDesktopWindow(), &rc);
 
     if ((hWnd != GetDesktopWindow())
-   #ifdef HAVE_QT5
+   #if defined(HAVE_QT5) || defined(HAVE_QT6)
        && (hWnd != GetShellWindow())
    #endif
        ) {
@@ -6965,7 +7023,7 @@ void MainWindow::getLabelNews()
 
   if (indexes.count() == 1) {
     QModelIndex index = indexes.at(0);
-    QStringList strLabelIdList = index.data(Qt::EditRole).toString().split(",", QString::SkipEmptyParts);
+    QStringList strLabelIdList = index.data(Qt::EditRole).toString().split(",", RSS_SKIP_EMPTY_PARTS);
     foreach (QString strLabelId, strLabelIdList) {
       for (int i = 0; i < newsLabelGroup_->actions().count(); i++) {
         if (newsLabelGroup_->actions().at(i)->data().toString() == strLabelId)
@@ -7505,4 +7563,3 @@ void MainWindow::createBackup()
     QFile::copy(settings.fileName(), backupFileName);
   }
 }
-

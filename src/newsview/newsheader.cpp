@@ -27,7 +27,7 @@ NewsHeader::NewsHeader(NewsModel *model, QWidget *parent)
 {
   setObjectName("newsHeader");
   setContextMenuPolicy(Qt::CustomContextMenu);
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
   setSectionsMovable(true);
 #else
   setMovable(true);
@@ -52,7 +52,7 @@ NewsHeader::NewsHeader(NewsModel *model, QWidget *parent)
   connect(buttonColumnView_, SIGNAL(clicked()), this, SLOT(slotButtonColumnView()));
 
   QHBoxLayout *buttonLayout = new QHBoxLayout();
-  buttonLayout->setMargin(0);
+  buttonLayout->setContentsMargins(0, 0, 0, 0);
   buttonLayout->addWidget(buttonColumnView_, 0, Qt::AlignRight|Qt::AlignVCenter);
   setLayout(buttonLayout);
 
@@ -101,8 +101,8 @@ void NewsHeader::init()
 
   resizeSection(model_->fieldIndex("starred"), 22);
   resizeSection(model_->fieldIndex("feedId"), 22);
-  resizeSection(model_->fieldIndex("read"), 22);
-#ifdef HAVE_QT5
+ resizeSection(model_->fieldIndex("read"), 22);
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
   setSectionResizeMode(model_->fieldIndex("starred"), QHeaderView::Fixed);
   setSectionResizeMode(model_->fieldIndex("feedId"), QHeaderView::Fixed);
   setSectionResizeMode(model_->fieldIndex("read"), QHeaderView::Fixed);
@@ -440,7 +440,7 @@ void NewsHeader::setColumns(const QModelIndex &indexFeed)
   MainWindow *mainWindow = mainApp->mainWindow();
   indexColumnsStr = mainWindow->feedsModel_->dataField(indexFeed, "columns").toString();
   if (!indexColumnsStr.isEmpty()) {
-    QStringList indexColumnsList = indexColumnsStr.split(",", QString::SkipEmptyParts);
+    QStringList indexColumnsList = indexColumnsStr.split(",", RSS_SKIP_EMPTY_PARTS);
     if (indexColumnsList.count()) {
       for (int i = 0; i < count(); ++i) {
         bool show = indexColumnsList.contains(QString::number(logicalIndex(i)));
@@ -455,7 +455,7 @@ void NewsHeader::setColumns(const QModelIndex &indexFeed)
     sortType = mainWindow->feedsModel_->dataField(indexFeed, "sortType").toInt();
   } else {
     indexColumnsStr = settings.value("columns").toString();
-    QStringList indexColumnsList = indexColumnsStr.split(",", QString::SkipEmptyParts);
+    QStringList indexColumnsList = indexColumnsStr.split(",", RSS_SKIP_EMPTY_PARTS);
     if (indexColumnsList.count()) {
       for (int i = 0; i < count(); ++i) {
         bool show = indexColumnsList.contains(QString::number(logicalIndex(i)));

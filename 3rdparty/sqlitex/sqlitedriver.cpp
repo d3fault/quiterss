@@ -46,6 +46,10 @@
 Q_DECLARE_OPAQUE_POINTER(sqlite3*)
 Q_DECLARE_OPAQUE_POINTER(sqlite3_stmt*)
 #endif
+#if defined(HAVE_QT6)
+Q_DECLARE_OPAQUE_POINTER(sqlite3*)
+Q_DECLARE_OPAQUE_POINTER(sqlite3_stmt*)
+#endif
 Q_DECLARE_METATYPE(sqlite3*)
 Q_DECLARE_METATYPE(sqlite3_stmt*)
 
@@ -80,7 +84,7 @@ static QVariant::Type qGetColumnType(const QString &tpName)
 static QSqlError qMakeError(sqlite3 *access, const QString &descr, QSqlError::ErrorType type,
                             int errorCode = -1)
 {
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
   return QSqlError(descr,
                    QString(reinterpret_cast<const QChar *>(sqlite3_errmsg16(access))),
                    type, QString::number(errorCode));
@@ -200,7 +204,11 @@ void SQLiteResultPrivate::initColumns(bool emptyResultset)
       }
     }
 
+#if defined(HAVE_QT6)
+    QSqlField fld(colName, QMetaType(int(fieldType)));
+#else
     QSqlField fld(colName, fieldType);
+#endif
     fld.setSqlType(stp);
     rInf.append(fld);
   }
@@ -326,7 +334,7 @@ SQLiteResult::~SQLiteResult()
 
 void SQLiteResult::virtual_hook(int id, void *data)
 {
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
   SqlCachedResult::virtual_hook(id, data);
 #else
   switch (id) {
@@ -729,7 +737,11 @@ static QSqlIndex qGetTableInfo(QSqlQuery &q, const QString &tableName, bool only
     if (onlyPIndex && !isPk)
       continue;
     QString typeName = q.value(2).toString().toLower();
+#if defined(HAVE_QT6)
+    QSqlField fld(q.value(1).toString(), QMetaType(int(qGetColumnType(typeName))));
+#else
     QSqlField fld(q.value(1).toString(), qGetColumnType(typeName));
+#endif
     if (isPk && (typeName == QLatin1String("integer")))
       // INTEGER PRIMARY KEY fields are auto-generated in sqlite
       // INT PRIMARY KEY is not the same as INTEGER PRIMARY KEY!

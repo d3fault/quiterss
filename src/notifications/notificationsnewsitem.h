@@ -18,7 +18,7 @@
 #ifndef NOTIFICATIONSNEWSITEM_H
 #define NOTIFICATIONSNEWSITEM_H
 
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
 #include <QtWidgets>
 #else
 #include <QtGui>

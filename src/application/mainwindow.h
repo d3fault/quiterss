@@ -18,10 +18,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
 #include <QtWidgets>
 #include <QMediaPlayer>
-#include <QMediaPlaylist>
 #else
 #include <QtGui>
 #ifdef HAVE_PHONON
@@ -29,8 +28,18 @@
 #include <phonon/mediaobject.h>
 #endif
 #endif
-#include <QtSql>
+
+#if defined(HAVE_QT6)
+#include <QAudioOutput>
+#include <QSoundEffect>
+#elif !defined(HAVE_QT5)
 #include <QSound>
+#else
+#include <QMediaPlaylist>
+#include <QSound>
+#endif
+
+#include <QtSql>
 
 #include "categoriestreewidget.h"
 #include "feedsmodel.h"
@@ -325,7 +334,7 @@ private slots:
   void slotFeedsViewportUpdate();
   void slotPlaySoundNewNews();
 
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
   void mediaStatusChanged(QMediaPlayer::MediaStatus status);
   void mediaError(QMediaPlayer::Error error);
 #endif
@@ -645,7 +654,10 @@ private:
 
   int openingFeedAction_;
 
-#ifdef HAVE_QT5
+#ifdef HAVE_QT6
+  QMediaPlayer *mediaPlayer_;
+  QAudioOutput *audioOutput_;
+#elif defined(HAVE_QT5)
   QMediaPlayer *mediaPlayer_;
   QMediaPlaylist *playlist_;
 #else

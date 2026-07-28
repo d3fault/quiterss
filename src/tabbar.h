@@ -18,7 +18,7 @@
 #ifndef TABBAR_H
 #define TABBAR_H
 
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
 #include <QtWidgets>
 #else
 #include <QtGui>

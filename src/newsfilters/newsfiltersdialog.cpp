@@ -36,7 +36,7 @@ NewsFiltersDialog::NewsFiltersDialog(QWidget *parent)
   filtersTree_->setColumnHidden(3, true);
   filtersTree_->setSortingEnabled(false);
   filtersTree_->header()->resizeSection(1, 150);
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
   filtersTree_->header()->setSectionsMovable(false);
 #else
   filtersTree_->header()->setMovable(false);
@@ -53,7 +53,7 @@ NewsFiltersDialog::NewsFiltersDialog(QWidget *parent)
     QSqlQuery q1;
     bool isFolder = false;
     QString strNameFeeds;
-    QStringList strIdFeeds = q.value(2).toString().split(",", QString::SkipEmptyParts);
+    QStringList strIdFeeds = q.value(2).toString().split(",", RSS_SKIP_EMPTY_PARTS);
     foreach (QString strIdFeed, strIdFeeds) {
       if (isFolder) strNameFeeds.append("; ");
       qStr = QString("SELECT text FROM feeds WHERE id==%1 AND xmlUrl!=''").
@@ -120,7 +120,7 @@ NewsFiltersDialog::NewsFiltersDialog(QWidget *parent)
   buttonsVLayout->addWidget(runFilterButton_);
 
   QHBoxLayout *mainlayout = new QHBoxLayout();
-  mainlayout->setMargin(0);
+  mainlayout->setContentsMargins(0, 0, 0, 0);
   mainlayout->addWidget(filtersTree_);
   mainlayout->addLayout(buttonsVLayout);
 
@@ -170,7 +170,7 @@ void NewsFiltersDialog::newFilter()
     QSqlQuery q1;
     bool isFolder = false;
     QString strNameFeeds;
-    QStringList strIdFeeds = q.value(1).toString().split(",", QString::SkipEmptyParts);
+    QStringList strIdFeeds = q.value(1).toString().split(",", RSS_SKIP_EMPTY_PARTS);
     foreach (QString strIdFeed, strIdFeeds) {
       if (isFolder) strNameFeeds.append("; ");
       qStr = QString("SELECT text FROM feeds WHERE id==%1 AND xmlUrl!=''").
@@ -231,7 +231,7 @@ void NewsFiltersDialog::editFilter()
     QSqlQuery q1;
     bool isFolder = false;
     QString strNameFeeds;
-    QStringList strIdFeeds = q.value(1).toString().split(",", QString::SkipEmptyParts);
+    QStringList strIdFeeds = q.value(1).toString().split(",", RSS_SKIP_EMPTY_PARTS);
     foreach (QString strIdFeed, strIdFeeds) {
       if (isFolder) strNameFeeds.append("; ");
       qStr = QString("SELECT text FROM feeds WHERE id==%1 AND xmlUrl!=''").
@@ -381,7 +381,7 @@ void NewsFiltersDialog::applyFilter()
       arg(filterId);
   q.exec(qStr);
   if (q.first()) {
-    QStringList strIdFeeds = q.value(0).toString().split(",", QString::SkipEmptyParts);
+    QStringList strIdFeeds = q.value(0).toString().split(",", RSS_SKIP_EMPTY_PARTS);
     q.finish();
     foreach (QString strIdFeed, strIdFeeds) {
       mainApp->runUserFilter(strIdFeed.toInt(), filterId);
