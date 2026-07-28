@@ -708,8 +708,12 @@ void NewsTabWidget::viewAllYoutubeVideos()
       QUrl htmlUrl = QUrl::fromEncoded(getLinkNews(i).toUtf8());
       QString host = htmlUrl.host();
       if (host == "youtube.com" || host == "www.youtube.com") {
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
           QUrlQuery query(htmlUrl);
           QString videoId = query.queryItemValue("v");
+#else
+          QString videoId = htmlUrl.queryItemValue("v");
+#endif
           if (!videoId.isEmpty()) {
             QString videoTitle = newsModel_->dataField(i, "title").toString();
             allYoutubeVideos.append(YoutubeVideoData{videoTitle, videoId});
