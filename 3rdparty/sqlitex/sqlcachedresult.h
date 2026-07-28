@@ -25,7 +25,11 @@
 #include <QtSql/qsqlresult.h>
 
 class QVariant;
+#if QT_VERSION >= 0x060000
+template <typename T> class QList;
+#else
 template <typename T> class QVector;
+#endif
 
 class SqlCachedResultPrivate;
 
@@ -34,7 +38,11 @@ class SqlCachedResult: public QSqlResult
 public:
   virtual ~SqlCachedResult();
 
+#if QT_VERSION >= 0x060000
+  typedef QList<QVariant> ValueCache;
+#else
   typedef QVector<QVariant> ValueCache;
+#endif
 
 protected:
   SqlCachedResult(const QSqlDriver * db);

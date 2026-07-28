@@ -22,6 +22,12 @@
 #include "VersionNo.h"
 #include "common.h"
 
+#ifdef HAVE_QT6
+#include <QtCore5Compat/QTextCodec>
+#else
+#include <QTextCodec>
+#endif
+
 #include <QDebug>
 #include <QDesktopServices>
 #include <QTextDocumentFragment>
@@ -131,7 +137,7 @@ void ParseObject::slotParse(const QByteArray &xmlData, const int &feedId,
     avoidedOldSingleNewsDate_ = q.value(4).toDate();
     QString excludePaths = q.value(5).toString();
     if (!excludePaths.isEmpty()) {
-      excludeSubPaths_ = excludePaths.split(",", QString::SkipEmptyParts);
+      excludeSubPaths_ = excludePaths.split(",", RSS_SKIP_EMPTY_PARTS);
       // Trim whitespace from each path
       for (int i = 0; i < excludeSubPaths_.size(); ++i) {
         excludeSubPaths_[i] = excludeSubPaths_[i].trimmed();
@@ -498,10 +504,10 @@ void ParseObject::addAtomNewsIntoBase(NewsItemStruct *newsItem)
   // Verify old news before a date to avoid adding them to base
   bool isOld = false;
   QDateTime pubDate_ = QDateTime::fromString(newsItem->updated, "yyyy-MM-ddTHH:mm:ss");
-  QDateTime avoidedDate_ = QDateTime(mainApp->mainWindow()->avoidedOldNewsDate_);
+  QDateTime avoidedDate_ = RSS_DATE_START_OF_DAY(mainApp->mainWindow()->avoidedOldNewsDate_);
   if (!addSingleNewsAnyDate_) {      //
     if (avoidedOldSingleNews_ ) {     // avoid adding old single news
-      if (QDateTime(avoidedOldSingleNewsDate_) > pubDate_)
+      if (RSS_DATE_START_OF_DAY(avoidedOldSingleNewsDate_) > pubDate_)
         isOld = true;
       } else if (mainApp->mainWindow()->avoidOldNews_ && avoidedDate_ > pubDate_) {   // avoid adding old news
         isOld = true;
@@ -813,13 +819,13 @@ void ParseObject::addRssNewsIntoBase(NewsItemStruct *newsItem)
   // Verify old news before a date to avoid adding them to base
   bool isOld = false;
   QDateTime pubDate_ = QDateTime::fromString(newsItem->updated, "yyyy-MM-ddTHH:mm:ss");
-  QDateTime avoidedDate_ = QDateTime(mainApp->mainWindow()->avoidedOldNewsDate_);
+  QDateTime avoidedDate_ = RSS_DATE_START_OF_DAY(mainApp->mainWindow()->avoidedOldNewsDate_);
   if (!addSingleNewsAnyDate_) {      //
     if (avoidedOldSingleNews_ ) {     // avoid adding old single news
-      if (QDateTime(avoidedOldSingleNewsDate_) > pubDate_)
+      if (RSS_DATE_START_OF_DAY(avoidedOldSingleNewsDate_) > pubDate_)
         isOld = true;
       } else if (mainApp->mainWindow()->avoidOldNews_ && avoidedDate_ > pubDate_) {   // avoid adding old news
-              isOld = true;
+        isOld = true;
       }
    }
 

@@ -21,6 +21,12 @@
 #include "database.h"
 #include "settings.h"
 
+#ifdef HAVE_QT6
+#include <QtCore5Compat/QTextCodec>
+#else
+#include <QTextCodec>
+#endif
+
 #include <QDebug>
 #include <qzregexp.h>
 

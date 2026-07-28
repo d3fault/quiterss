@@ -17,12 +17,15 @@
 * ============================================================ */
 #include "logfile.h"
 
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
 #include <QStandardPaths>
 #else
 #include <QDesktopServices>
 #endif
 #include <QDir>
+#ifdef HAVE_QT6
+#include <QStringConverter>
+#endif
 
 #include "globals.h"
 #include "settings.h"
@@ -31,7 +34,7 @@ LogFile::LogFile()
 {
 }
 
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
 void LogFile::msgHandler(QtMsgType type, const QMessageLogContext &, const QString &msg)
 {
   if (!globals.isInit_)
@@ -56,7 +59,11 @@ void LogFile::msgHandler(QtMsgType type, const QMessageLogContext &, const QStri
 
   QTextStream stream;
   stream.setDevice(&file);
+#if defined(HAVE_QT6)
+  stream.setEncoding(QStringConverter::Utf8);
+#else
   stream.setCodec("UTF-8");
+#endif
 
   if (file.isOpen()) {
     QString currentDateTime = QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz");

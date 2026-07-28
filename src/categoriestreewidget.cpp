@@ -35,8 +35,8 @@ CategoriesTreeWidget::CategoriesTreeWidget(QWidget * parent)
   setColumnHidden(1, true);
   setColumnHidden(2, true);
   setColumnHidden(3, true);
-  header()->hide();
-#ifdef HAVE_QT5
+ header()->hide();
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
   header()->setSectionResizeMode(0, QHeaderView::Stretch);
   header()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
 #else

@@ -43,6 +43,10 @@
 #include <QCoreApplication>
 #include <QDataStream>
 #include <QTime>
+#include <QRegExp>
+#ifdef HAVE_QT6
+#include <QRegularExpression>
+#endif
 
 #if defined(Q_OS_WIN)
 #include <QLibrary>
@@ -76,13 +80,21 @@ QtLocalPeer::QtLocalPeer(QObject* parent, const QString &appId)
 #if defined(Q_OS_WIN)
         id = id.toLower();
 #endif
-        prefix = id.section(QLatin1Char('/'), -1);
-    }
+    prefix = id.section(QLatin1Char('/'), -1);
+}
+#if defined(HAVE_QT6)
+    prefix.remove(QRegularExpression("[^a-zA-Z]"));
+#else
     prefix.remove(QRegExp("[^a-zA-Z]"));
+#endif
     prefix.truncate(6);
 
     QByteArray idc = id.toUtf8();
+#if defined(HAVE_QT6)
+    quint16 idNum = qChecksum(QByteArrayView(idc));
+#else
     quint16 idNum = qChecksum(idc.constData(), idc.size());
+#endif
     socketName = QLatin1String("qtsingleapp-") + prefix
                  + QLatin1Char('-') + QString::number(idNum, 16);
 

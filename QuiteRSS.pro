@@ -31,7 +31,10 @@ exists(.git) {
   }
 }
 
-isEqual(QT_MAJOR_VERSION, 5) {
+isEqual(QT_MAJOR_VERSION, 6) {
+  QT += core gui widgets network xml printsupport sql multimedia core5compat
+  DEFINES += HAVE_QT6
+} else:isEqual(QT_MAJOR_VERSION, 5) {
   QT += widgets network xml printsupport sql multimedia
   DEFINES += HAVE_QT5
 } else {
@@ -184,12 +187,19 @@ OBJECTS_DIR = $${BUILD_DIR}/obj
 MOC_DIR = $${BUILD_DIR}/moc
 RCC_DIR = $${BUILD_DIR}/rcc
 
+# Qt4 keeps QString::SkipEmptyParts; Qt5/Qt6 moved it to Qt::SplitBehavior.
+greaterThan(QT_MAJOR_VERSION, 4) {
+  DEFINES += RSS_SKIP_EMPTY_PARTS=Qt::SkipEmptyParts
+} else {
+  DEFINES += RSS_SKIP_EMPTY_PARTS=QString::SkipEmptyParts
+}
+
 isEmpty(SYSTEMQTSA) {
   include(3rdparty/qtsingleapplication/qtsingleapplication.pri)
 } else {
   CONFIG += qtsingleapplication
 }
-isEqual(QT_MAJOR_VERSION, 5) {
+greaterThan(QT_MAJOR_VERSION, 4) {
   include(3rdparty/qftp/qftp.pri)
 }
 include(3rdparty/sqlite.pri)

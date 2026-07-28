@@ -270,7 +270,7 @@ SqlCachedResult::ValueCache &SqlCachedResult::cache()
 
 void SqlCachedResult::virtual_hook(int id, void *data)
 {
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
   QSqlResult::virtual_hook(id, data);
 #else
   switch (id) {

@@ -29,6 +29,10 @@
 #include <QSslSocket>
 #include <QDebug>
 
+#ifdef HAVE_QT6
+#include <QRegularExpression>
+#endif
+
 static QString fileNameForCert(const QSslCertificate &cert)
 {
   QString certFileName = SslErrorDialog::certificateItemText(cert);
@@ -140,7 +144,11 @@ void NetworkManager::loadCertificates()
       }
     }
 #else
+#if defined(HAVE_QT6)
+    caCerts_ += QSslCertificate::fromPath(path + "/*.crt", QSsl::Pem, QSslCertificate::PatternSyntax::Wildcard);
+#else
     caCerts_ += QSslCertificate::fromPath(path + "/*.crt", QSsl::Pem, QRegExp::Wildcard);
+#endif
 #endif
   }
   // Local Certificates
@@ -158,7 +166,11 @@ void NetworkManager::loadCertificates()
     }
   }
 #else
+#if defined(HAVE_QT6)
+  localCerts_ = QSslCertificate::fromPath(mainApp->dataDir() + "/certificates/*.crt", QSsl::Pem, QSslCertificate::PatternSyntax::Wildcard);
+#else
   localCerts_ = QSslCertificate::fromPath(mainApp->dataDir() + "/certificates/*.crt", QSsl::Pem, QRegExp::Wildcard);
+#endif
 #endif
   QSslConfiguration::defaultConfiguration().setCaCertificates(caCerts_ + localCerts_);
 
@@ -330,7 +342,13 @@ bool NetworkManager::containsRejectedCerts(const QList<QSslCertificate> &certs)
 void NetworkManager::addLocalCertificate(const QSslCertificate &cert)
 {
   localCerts_.append(cert);
+#if defined(HAVE_QT6)
+  QSslConfiguration sslCfg = QSslConfiguration::defaultConfiguration();
+  sslCfg.addCaCertificate(cert);
+  QSslConfiguration::setDefaultConfiguration(sslCfg);
+#else
   QSslSocket::addDefaultCaCertificate(cert);
+#endif
 
   QDir dir(mainApp->dataDir());
   if (!dir.exists("certificates")) {

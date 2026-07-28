@@ -18,7 +18,7 @@
 #ifndef SPLASHSCREEN_H
 #define SPLASHSCREEN_H
 
-#ifdef HAVE_QT5
+#if defined(HAVE_QT5) || defined(HAVE_QT6)
 #include <QtWidgets>
 #else
 #include <QtGui>
@@ -28,7 +28,7 @@ class SplashScreen : public QSplashScreen
 {
   Q_OBJECT
 public:
-  explicit SplashScreen(const QPixmap &pixmap = QPixmap(), Qt::WindowFlags flag = 0);
+  explicit SplashScreen(const QPixmap &pixmap = QPixmap(), Qt::WindowFlags flag = Qt::WindowFlags());
 
   void setProgress(int value);
 
