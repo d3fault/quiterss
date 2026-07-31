@@ -95,29 +95,21 @@
     <name>AdBlockAddSubscriptionDialog</name>
     <message>
         <location filename="../src/adblock/adblockaddsubscriptiondialog.ui" line="14"/>
-        <location filename="../build/QuiteRSS_autogen/include/ui_adblockaddsubscriptiondialog.h" line="89"/>
-        <location filename="../ui_adblockaddsubscriptiondialog.h" line="89"/>
         <source>Add Subscription</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/adblock/adblockaddsubscriptiondialog.ui" line="23"/>
-        <location filename="../build/QuiteRSS_autogen/include/ui_adblockaddsubscriptiondialog.h" line="90"/>
-        <location filename="../ui_adblockaddsubscriptiondialog.h" line="90"/>
         <source>Title:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/adblock/adblockaddsubscriptiondialog.ui" line="33"/>
-        <location filename="../build/QuiteRSS_autogen/include/ui_adblockaddsubscriptiondialog.h" line="91"/>
-        <location filename="../ui_adblockaddsubscriptiondialog.h" line="91"/>
         <source>Address:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/adblock/adblockaddsubscriptiondialog.ui" line="53"/>
-        <location filename="../build/QuiteRSS_autogen/include/ui_adblockaddsubscriptiondialog.h" line="92"/>
-        <location filename="../ui_adblockaddsubscriptiondialog.h" line="92"/>
         <source>Add new subscription to AdBlock:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -136,43 +128,31 @@
     <name>AdBlockDialog</name>
     <message>
         <location filename="../src/adblock/adblockdialog.ui" line="14"/>
-        <location filename="../build/QuiteRSS_autogen/include/ui_adblockdialog.h" line="146"/>
-        <location filename="../ui_adblockdialog.h" line="146"/>
         <source>AdBlock Configuration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/adblock/adblockdialog.ui" line="20"/>
-        <location filename="../build/QuiteRSS_autogen/include/ui_adblockdialog.h" line="147"/>
-        <location filename="../ui_adblockdialog.h" line="147"/>
         <source>Enable AdBlock</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/adblock/adblockdialog.ui" line="32"/>
-        <location filename="../build/QuiteRSS_autogen/include/ui_adblockdialog.h" line="148"/>
-        <location filename="../ui_adblockdialog.h" line="148"/>
         <source>Search...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/adblock/adblockdialog.ui" line="68"/>
-        <location filename="../build/QuiteRSS_autogen/include/ui_adblockdialog.h" line="149"/>
-        <location filename="../ui_adblockdialog.h" line="149"/>
         <source>Options</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/adblock/adblockdialog.ui" line="98"/>
-        <location filename="../build/QuiteRSS_autogen/include/ui_adblockdialog.h" line="150"/>
-        <location filename="../ui_adblockdialog.h" line="150"/>
         <source>AdBlock</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/adblock/adblockdialog.ui" line="122"/>
-        <location filename="../build/QuiteRSS_autogen/include/ui_adblockdialog.h" line="151"/>
-        <location filename="../ui_adblockdialog.h" line="151"/>
         <source>Use only essential part of EasyList (for performance reasons)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4370,22 +4350,22 @@ Ancient news could reappear</source>
 <context>
     <name>RequestFeed</name>
     <message>
-        <location filename="../src/requestfeed.cpp" line="230"/>
+        <location filename="../src/requestfeed.cpp" line="232"/>
         <source>Server requires authentication!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/requestfeed.cpp" line="232"/>
+        <location filename="../src/requestfeed.cpp" line="234"/>
         <source>Server replied: Not Found!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/requestfeed.cpp" line="281"/>
+        <location filename="../src/requestfeed.cpp" line="283"/>
         <source>Redirect error!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/requestfeed.cpp" line="363"/>
+        <location filename="../src/requestfeed.cpp" line="365"/>
         <source>Request timeout!</source>
         <translation type="unfinished"></translation>
     </message>
