@@ -4927,7 +4927,7 @@ void MainWindow::showFeedPropertiesDlg()
   q.prepare("UPDATE feeds SET text = ?, xmlUrl = ?, displayOnStartup = ?, "
             "displayEmbeddedImages = ?, displayNews = ?, layoutDirection = ?, "
             "label = ?, duplicateNewsMode = ?, addSingleNewsAnyDateOn = ?, avoidedOldSingleNewsDateOn = ?, avoidedOldSingleNewsDate = ?,"
-            " authentication = ?, disableUpdate = ? WHERE id == ?");
+            " authentication = ?, disableUpdate = ?, excludeSubPaths = ? WHERE id == ?");
   q.addBindValue(properties.general.text);
   q.addBindValue(properties.general.url);
   q.addBindValue(properties.general.displayOnStartup);
@@ -5051,6 +5051,7 @@ void MainWindow::showFeedPropertiesDlg()
   QModelIndex indexavoidedOldSingleNewsDate = feedsModel_->indexSibling(index, "avoidedOldSingleNewsDate");
   QModelIndex indexAuthentication = feedsModel_->indexSibling(index, "authentication");
   QModelIndex indexDisableUpdate = feedsModel_->indexSibling(index, "disableUpdate");
+  QModelIndex indexExcludeSubPaths = feedsModel_->indexSibling(index, "excludeSubPaths");
   feedsModel_->setData(indexText, properties.general.text);
   feedsModel_->setData(indexUrl, properties.general.url);
   feedsModel_->setData(indexStartup, properties.general.displayOnStartup);
@@ -5064,6 +5065,7 @@ void MainWindow::showFeedPropertiesDlg()
   feedsModel_->setData(indexavoidedOldSingleNewsDate, properties.general.avoidedOldSingleNewsDate);
   feedsModel_->setData(indexAuthentication, properties.authentication.on ? 1 : 0);
   feedsModel_->setData(indexDisableUpdate, properties.general.disableUpdate ? 1 : 0);
+  feedsModel_->setData(indexExcludeSubPaths, properties.general.excludeSubPaths);
 
   if (!properties.general.updateEnable ||
       (properties.general.updateEnable != updateFeedsEnable_) ||
