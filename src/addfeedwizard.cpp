@@ -135,7 +135,7 @@ QWizardPage *AddFeedWizard::createUrlFeedPage()
   textWarning->setFont(font);
 
   QHBoxLayout *warningLayout = new QHBoxLayout();
-  warningLayout->setMargin(0);
+  warningLayout->setContentsMargins(0, 0, 0, 0);
   warningLayout->addWidget(iconWarning);
   warningLayout->addWidget(textWarning, 1);
 
@@ -232,11 +232,11 @@ QWizardPage *AddFeedWizard::createNameFeedPage()
   newFolderButton->setAutoRaise(true);
 
   QHBoxLayout *newFolderLayout = new QHBoxLayout;
-  newFolderLayout->setMargin(0);
+  newFolderLayout->setContentsMargins(0, 0, 0, 0);
   newFolderLayout->addWidget(newFolderButton);
   newFolderLayout->addStretch();
   QVBoxLayout *newFolderVLayout = new QVBoxLayout;
-  newFolderVLayout->setMargin(2);
+  newFolderVLayout->setContentsMargins(2, 2, 2, 2);
   newFolderVLayout->addStretch();
   newFolderVLayout->addLayout(newFolderLayout);
 

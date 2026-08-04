@@ -426,7 +426,7 @@ void MainWindow::createFeedsWidget()
   feedsToolBar_->setStyleSheet("QToolBar { border: none; padding: 0px; }");
 
   QHBoxLayout *feedsPanelLayout = new QHBoxLayout();
-  feedsPanelLayout->setMargin(2);
+  feedsPanelLayout->setContentsMargins(2, 2, 2, 2);
   feedsPanelLayout->addWidget(feedsToolBar_, 1);
 
   feedsPanel_ = new QWidget(this);
@@ -438,7 +438,7 @@ void MainWindow::createFeedsWidget()
 
   findFeeds_ = new FindFeed(this);
   QVBoxLayout *findFeedsLayout = new QVBoxLayout();
-  findFeedsLayout->setMargin(2);
+  findFeedsLayout->setContentsMargins(2, 2, 2, 2);
   findFeedsLayout->addWidget(findFeeds_);
   findFeedsWidget_ = new QWidget(this);
   findFeedsWidget_->hide();
@@ -455,7 +455,7 @@ void MainWindow::createFeedsWidget()
   showCategoriesButton_->setAutoRaise(true);
 
   QHBoxLayout *categoriesPanelLayout = new QHBoxLayout();
-  categoriesPanelLayout->setMargin(2);
+  categoriesPanelLayout->setContentsMargins(2, 2, 2, 2);
   categoriesPanelLayout->addSpacing(2);
   categoriesPanelLayout->addWidget(categoriesLabel_, 1);
   categoriesPanelLayout->addWidget(showCategoriesButton_);
@@ -465,7 +465,7 @@ void MainWindow::createFeedsWidget()
   categoriesPanel_->setLayout(categoriesPanelLayout);
 
   QVBoxLayout *categoriesLayout = new QVBoxLayout();
-  categoriesLayout->setMargin(0);
+  categoriesLayout->setContentsMargins(0, 0, 0, 0);
   categoriesLayout->setSpacing(0);
   categoriesLayout->addWidget(categoriesPanel_);
   categoriesLayout->addWidget(categoriesTree_, 1);
@@ -489,7 +489,7 @@ void MainWindow::createFeedsWidget()
   feedsSplitter_->setSizes(sizes);
 
   QVBoxLayout *feedsLayout = new QVBoxLayout();
-  feedsLayout->setMargin(0);
+  feedsLayout->setContentsMargins(0, 0, 0, 0);
   feedsLayout->setSpacing(0);
   feedsLayout->addWidget(feedsPanel_);
   feedsLayout->addWidget(findFeedsWidget_);
@@ -710,7 +710,7 @@ void MainWindow::createCentralWidget()
   mainLayout1->addWidget(mainSplitter_, 1);
 
   QVBoxLayout *mainLayout = new QVBoxLayout();
-  mainLayout->setMargin(0);
+  mainLayout->setContentsMargins(0, 0, 0, 0);
   mainLayout->setSpacing(0);
   mainLayout->addWidget(tabBarWidget_);
   mainLayout->addLayout(mainLayout1, 1);

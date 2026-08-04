@@ -61,7 +61,7 @@ NewsTabWidget::NewsTabWidget(QWidget *parent, TabType type, int feedId, int feed
           this, SLOT(slotTabClose()));
 
   QHBoxLayout *newsTitleLayout = new QHBoxLayout();
-  newsTitleLayout->setMargin(0);
+  newsTitleLayout->setContentsMargins(0, 0, 0, 0);
   newsTitleLayout->setSpacing(0);
   newsTitleLayout->addWidget(newsIconTitle_);
   newsTitleLayout->addSpacing(3);
@@ -107,7 +107,7 @@ NewsTabWidget::NewsTabWidget(QWidget *parent, TabType type, int feedId, int feed
   }
 
   QVBoxLayout *layout = new QVBoxLayout();
-  layout->setMargin(0);
+  layout->setContentsMargins(0, 0, 0, 0);
   layout->setSpacing(0);
   if (type_ == TabTypeDownloads)
     layout->addWidget(mainApp->downloadManager());
@@ -210,7 +210,7 @@ void NewsTabWidget::createNewsList()
   findText_->setFixedWidth(200);
 
   QHBoxLayout *newsPanelLayout = new QHBoxLayout();
-  newsPanelLayout->setMargin(2);
+  newsPanelLayout->setContentsMargins(2, 2, 2, 2);
   newsPanelLayout->setSpacing(2);
   newsPanelLayout->addWidget(newsToolBar_);
   newsPanelLayout->addStretch(1);
@@ -227,7 +227,7 @@ void NewsTabWidget::createNewsList()
     newsPanelWidget_->hide();
 
   QVBoxLayout *newsLayout = new QVBoxLayout();
-  newsLayout->setMargin(0);
+  newsLayout->setContentsMargins(0, 0, 0, 0);
   newsLayout->setSpacing(0);
   newsLayout->addWidget(newsPanelWidget_);
   newsLayout->addWidget(newsView_);
@@ -351,7 +351,7 @@ void NewsTabWidget::createWebWidget()
   webViewProgressLabel_->setObjectName("webViewProgressLabel_");
   webViewProgressLabel_->setStyleSheet("background: none;");
   QHBoxLayout *progressLayout = new QHBoxLayout();
-  progressLayout->setMargin(0);
+  progressLayout->setContentsMargins(0, 0, 0, 0);
   progressLayout->addWidget(webViewProgressLabel_, 0, Qt::AlignLeft|Qt::AlignVCenter);
   webViewProgress_->setLayout(progressLayout);
 
@@ -381,7 +381,7 @@ void NewsTabWidget::createWebWidget()
   locationBar_ = new LocationBar(webView_, this);
 
   QHBoxLayout *webControlPanelLayout = new QHBoxLayout();
-  webControlPanelLayout->setMargin(2);
+  webControlPanelLayout->setContentsMargins(2, 2, 2, 2);
   webControlPanelLayout->setSpacing(2);
   webControlPanelLayout->addWidget(webToolBar_);
   webControlPanelLayout->addWidget(locationBar_, 1);
@@ -400,7 +400,7 @@ void NewsTabWidget::createWebWidget()
 
   //! Create web layout
   QVBoxLayout *webLayout = new QVBoxLayout();
-  webLayout->setMargin(0);
+  webLayout->setContentsMargins(0, 0, 0, 0);
   webLayout->setSpacing(0);
   webLayout->addWidget(webControlPanel_);
   webLayout->addWidget(webView_, 1);
