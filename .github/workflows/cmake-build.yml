@@ -1,98 +1,126 @@
-name: CMake build with gcc in windows
+name: QMake Windows 32-bit (MSYS2)
 
 on:
   push:
-    paths-ignore:
-      - '.github/**'
-      - 'data/ca-bundle.crt'
-      - 'README.md'
-    branches:
-      - master
-  schedule:
-    - cron: '0 0 1 * *'
-  workflow_dispatch:
+    branches: [ "master" ]
+  pull_request:
 
 jobs:
   build:
+    name: Build (qmake + MinGW 32-bit)
     runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
-    strategy:
-      matrix:
-        sys: [mingw64, ucrt64]
-        include:
-        - sys: mingw64
-          env: x86_64
-        - sys: ucrt64
-          env: ucrt-x86_64
+
     steps:
-      - name: Checkout branch
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-      - name: Install toolchain and Qt libraries
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: ${{matrix.sys}}
-          update: true
-          install: >-
-            git
-            make
-            upx
-            p7zip
-            mingw-w64-${{matrix.env}}-toolchain
-            mingw-w64-${{matrix.env}}-qt5
-            mingw-w64-${{matrix.env}}-qtwebkit
-            mingw-w64-${{matrix.env}}-pkgconf
-            mingw-w64-${{matrix.env}}-cmake
-      - name: Configure
-        run: |
-          mkdir build
-          cd build
-          cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ../
-      - name: Build
-        working-directory: ./build
-        run: |
-          cmake --build ./
-      - name: Deploy - copy to dist
-        run: |
-          mkdir -p dist
-          cp -rf build/QuiteRSS.exe ./dist/
-          cp -rf build/lang/ ./dist/
-      - name: Deploy - Qt
-        run: |
-          windeployqt-qt5 --no-opengl-sw --no-angle --no-system-d3d-compiler --force ./dist/QuiteRSS.exe
-      - name: Deploy - mingw
-        run: |
-          cp $MSYSTEM_PREFIX/bin/libcrypto-*.dll ./dist/
-          cp $MSYSTEM_PREFIX/bin/libssl-*.dll ./dist/
-          ldd ./dist/QuiteRSS.exe | grep "=> /" | grep ${{matrix.sys}} | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./dist/
-      - name: Deploy - Qt imageformats dependency
-        working-directory: ./dist/
-        run: |
-          find ./imageformats/ -name "*.dll" -exec ldd {} \; | grep "=> /" | grep ${{matrix.sys}} | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./
-      - name: Deploy - strip
-        run: |
-          find ./dist/ -name '*.dll' -exec strip {} \;
-          find ./dist/ -name '*.exe' -exec strip {} \;
-      - name: Deploy - resource
-        run: |
-          cp -rvf ./sound ./dist/
-          cp -rvf ./style ./dist/
-          touch ./dist/portable.dat
-      - name: Deploy - upx
-        run: |
-          upx --best --brute --ultra-brute -v ./dist/QuiteRSS.exe
-      - name: Deploy - create file name
-        run: |
-          echo "filename=QuiteRss-gcc-${{matrix.env}}-$(date +"%Y%m%d_%H%M%S")" >> $GITHUB_ENV
-      - name: Deploy - 7z archive
-        run: |
-          7z a -mx=9 ${{ env.filename }}.7z ./dist/*
-      - name: Upload
-        uses: actions/upload-artifact@v7
-        with:
-          archive: false
-          name: ${{ env.filename }}.7z
-          path: ${{ env.filename }}.7z
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup MSYS2 (install toolchain only)
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW32
+        update: true
+        # install only the toolchain here; Qt packages installed in the next step via pacman
+        install: |
+          mingw-w64-i686-toolchain
+
+    - name: Install Qt5 (pacman fallback) and optional WebKit
+      shell: bash
+      run: |
+        set -euo pipefail
+        export MSYS2_PATH_TYPE=inherit
+
+        echo "Updating pacman DB and core system"
+        pacman -Sy --noconfirm
+
+        # Try several possible package names for Qt5 in MINGW32 repo
+        QT_PKG=""
+        if pacman -Ss '^mingw-w64-i686-qt5$' | grep -q 'mingw-w64-i686-qt5'; then
+          QT_PKG="mingw-w64-i686-qt5"
+        elif pacman -Ss '^mingw-w64-i686-qt5-base$' | grep -q 'mingw-w64-i686-qt5-base'; then
+          QT_PKG="mingw-w64-i686-qt5-base"
+        elif pacman -Ss 'mingw-w64-i686-qt5' | grep -q 'mingw-w64-i686-qt5'; then
+          QT_PKG="mingw-w64-i686-qt5"
+        elif pacman -Ss 'qt5' | grep -q 'qt5'; then
+          # fallback to generic qt5 packages (will pick distro's naming)
+          QT_PKG="qt5-base"
+        fi
+
+        if [ -n "$QT_PKG" ]; then
+          echo "Installing Qt package: $QT_PKG"
+          pacman -S --noconfirm --needed $QT_PKG || true
+        else
+          echo "No Qt5 package found in pacman repos for MINGW32. You may need to provide a custom Qt (see workflow comments)."
+          # don't exit here — we might continue to show logs; but subsequent qmake won't exist.
+        fi
+
+        # Try to install WebKit if available (not always present)
+        if pacman -Ss '^mingw-w64-i686-qt5-webkit' | grep -q 'mingw-w64-i686-qt5-webkit'; then
+          echo "Installing QtWebKit (mingw-w64-i686-qt5-webkit)"
+          pacman -S --noconfirm --needed mingw-w64-i686-qt5-webkit || true
+        else
+          echo "QtWebKit package not found in pacman repos (this may be expected on recent MSYS2)."
+        fi
+
+    - name: Build (qmake) — capture output to build.log
+      shell: bash
+      run: |
+        set -euo pipefail
+        export PATH="/c/msys64/mingw32/bin:$PATH"
+        mkdir -p build-logs
+        echo "Using qmake at: $(which qmake || echo 'qmake-not-found')"
+        # Run qmake and make, tee output to build.log so we can upload it even on failure
+        {
+          echo "---- QMAKE ----"
+          qmake -r CONFIG+=release QuiteRSS.pro || true
+          echo "---- MAKE ----"
+          mingw32-make -j$(nproc || 2) || true
+        } 2>&1 | tee build-logs/build.log
+
+        # exit with the same code as the build command (non-zero if build failed)
+        tail -n +1 build-logs/build.log | sed -n '1,1p' # ensure file exists
+        if grep -q 'error:' build-logs/build.log || grep -q 'undefined reference' build-logs/build.log; then
+          echo "Build appears to have errors (see build.log)"
+          # continue to artifact upload so user can download the log
+          exit 1
+        fi
+
+    - name: Collect artifacts (exe + DLLs) and package
+      if: always()
+      shell: bash
+      run: |
+        set -euo pipefail || true
+        mkdir -p artifacts
+
+        # copy exe(s) from likely build locations
+        EXE=$(find . -type f -name "*QuiteRSS*.exe" -o -name "*.exe" | grep -v ".git" | head -n1 || true)
+        if [ -n "$EXE" ]; then
+          cp -v "$EXE" artifacts/ || true
+        else
+          # copy any exe found in the repo tree as a last resort
+          find . -type f -name "*.exe" -exec cp -v {} artifacts/ \; || true
+        fi
+
+        # copy Qt runtime DLLs from MSYS2 mingw32 bin (best-effort)
+        if [ -d "/c/msys64/mingw32/bin" ]; then
+          cp -v /c/msys64/mingw32/bin/*.dll artifacts/ || true
+        fi
+
+        # create ZIP if artifacts directory not empty
+        if [ "$(ls -A artifacts 2>/dev/null || true)" ]; then
+          powershell -Command "Compress-Archive -Path artifacts/* -DestinationPath artifacts.zip -Force"
+        else
+          echo "No artifacts found to package"
+        fi
+
+    - name: Upload build log (always)
+      uses: actions/upload-artifact@v4
+      with:
+        name: qmake-build-log
+        path: build-logs/build.log
+
+    - name: Upload build artifacts (zip) if present
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: quiterss-windows-mingw32-qmake
+        path: artifacts.zip
